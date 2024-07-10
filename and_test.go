@@ -11,10 +11,15 @@ func testAgainstGeneric(t *testing.T, size int) {
 	b := make([]byte, size)
 	c1 := make([]byte, size)
 	c2 := make([]byte, size)
+	rng := rand.New(rand.NewPCG(0, 0))
+	for i := range a {
+		a[i] = uint8(rng.UintN(256))
+		b[i] = uint8(rng.UintN(256))
+	}
 	And(c1, a, b)
 	andGeneric(c2, a, b)
 	if !bytes.Equal(c1, c2) {
-		t.Fatal()
+		t.Fatalf("And produced a different result from andGeneric at length %d:\n%x\n%x", size, c1, c2)
 	}
 }
 

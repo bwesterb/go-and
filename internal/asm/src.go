@@ -31,7 +31,7 @@ func main() {
 		VPAND(as[i], bs[i], bs[i])
 	}
 	for i := 0; i < len(as); i++ {
-		VMOVDQU(Mem{Base: dst, Disp: 32 * i}, bs[i])
+		VMOVDQU(bs[i], Mem{Base: dst, Disp: 32 * i})
 	}
 
 	SUBQ(U32(1), l)

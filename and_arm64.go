@@ -10,7 +10,5 @@ func and(dst, a, b []byte) {
 		andNEON(&dst[0], &a[0], &b[0], l)
 	}
 	l <<= 8
-	for i := l; i < uint64(len(a)); i++ {
-		dst[i] = a[i] & b[i]
-	}
+	andGeneric(dst[l:], a[l:], b[l:])
 }

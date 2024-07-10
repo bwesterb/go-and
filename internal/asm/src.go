@@ -1,4 +1,4 @@
-//go:generate go run src.go -out ../and_amd64.s -stubs ../and_stubs_amd64.go -pkg and
+//go:generate go run src.go -out ../../and_amd64.s -stubs ../../and_stubs_amd64.go -pkg and
 package main
 
 import (

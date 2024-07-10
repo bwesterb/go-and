@@ -15,3 +15,5 @@ func main() {
     and.And(dst, a, b)
 }
 ```
+
+Makes use of AVX2 on AMD64 and NEON on ARM64.

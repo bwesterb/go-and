@@ -34,6 +34,9 @@ func main() {
 		VMOVDQU(bs[i], Mem{Base: dst, Disp: 32 * i})
 	}
 
+	ADDQ(U32(256), a)
+	ADDQ(U32(256), b)
+	ADDQ(U32(256), dst)
 	SUBQ(U32(1), l)
 	JNZ(LabelRef("loop"))
 

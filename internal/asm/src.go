@@ -31,9 +31,12 @@ func main() {
 		VPAND(as[i], bs[i], bs[i])
 	}
 	for i := 0; i < len(as); i++ {
-		VMOVDQU(Mem{Base: dst, Disp: 32 * i}, bs[i])
+		VMOVDQU(bs[i], Mem{Base: dst, Disp: 32 * i})
 	}
 
+	ADDQ(U32(256), a)
+	ADDQ(U32(256), b)
+	ADDQ(U32(256), dst)
 	SUBQ(U32(1), l)
 	JNZ(LabelRef("loop"))
 

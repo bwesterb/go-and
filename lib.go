@@ -1,9 +1,13 @@
+// and implements bitwise and for two byte-slices.
 package and
 
 import (
 	"encoding/binary"
 )
 
+// Writes bitwise and of a and b to dst.
+//
+// Panics if len(a) ≠ len(b), or len(dst) ≠ len(a).
 func And(dst, a, b []byte) {
 	if len(a) != len(b) || len(b) != len(dst) {
 		panic("lengths of a, b and dst must be equal")

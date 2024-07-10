@@ -1,4 +1,3 @@
-// go:build arm64
 package and
 
 //go:noescape

@@ -13,7 +13,11 @@ func And(dst, a, b []byte) {
 		panic("lengths of a, b and dst must be equal")
 	}
 
-	and(dst, a, b)
+	if hasAVX2() {
+		and(dst, a, b)
+		return
+	}
+	andGeneric(dst, a, b)
 }
 
 func andGeneric(dst, a, b []byte) {

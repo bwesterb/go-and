@@ -6,3 +6,13 @@ package and
 //
 //go:noescape
 func andAVX2(dst *byte, a *byte, b *byte, l uint64)
+
+// Sets dst to the bitwise or of a and b assuming all are 256*l bytes
+//
+//go:noescape
+func orAVX2(dst *byte, a *byte, b *byte, l uint64)
+
+// Sets dst to the bitwise and of not(a) and b assuming all are 256*l bytes
+//
+//go:noescape
+func andNotAVX2(dst *byte, a *byte, b *byte, l uint64)

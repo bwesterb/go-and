@@ -7,12 +7,18 @@ import (
 )
 
 func main() {
-	// Must be called on 32 byte aligned a, b, dst.
-	TEXT("andAVX2", NOSPLIT, "func(dst, a, b *byte, l uint64)")
+	gen("and", VPAND, "Sets dst to the bitwise and of a and b")
+	gen("or", VPOR, "Sets dst to the bitwise or of a and b")
+	gen("andNot", VPANDN, "Sets dst to the bitwise and of not(a) and b")
+	Generate()
+}
+
+func gen(name string, op func(Op, Op, Op), doc string) {
+	TEXT(name+"AVX2", NOSPLIT, "func(dst, a, b *byte, l uint64)")
 
 	Pragma("noescape")
 
-	Doc("Sets dst to the bitwise and of a and b assuming all are 256*l bytes")
+	Doc(doc + " assuming all are 256*l bytes")
 	a := Load(Param("a"), GP64())
 	b := Load(Param("b"), GP64())
 	dst := Load(Param("dst"), GP64())
@@ -28,7 +34,7 @@ func main() {
 		VMOVDQU(Mem{Base: b, Disp: 32 * i}, bs[i])
 	}
 	for i := 0; i < len(as); i++ {
-		VPAND(as[i], bs[i], bs[i])
+		op(bs[i], as[i], bs[i])
 	}
 	for i := 0; i < len(as); i++ {
 		VMOVDQU(bs[i], Mem{Base: dst, Disp: 32 * i})
@@ -41,5 +47,4 @@ func main() {
 	JNZ(LabelRef("loop"))
 
 	RET()
-	Generate()
 }

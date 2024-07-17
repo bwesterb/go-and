@@ -1,7 +1,7 @@
 package and
 
 func and(dst, a, b []byte) {
-	l := 0
+	l := uint64(0)
 	if hasAVX2() {
 		l = uint64(len(a)) >> 8
 		if l != 0 {
@@ -13,7 +13,7 @@ func and(dst, a, b []byte) {
 }
 
 func or(dst, a, b []byte) {
-	l := 0
+	l := uint64(0)
 	if hasAVX2() {
 		l = uint64(len(a)) >> 8
 		if l != 0 {
@@ -25,7 +25,7 @@ func or(dst, a, b []byte) {
 }
 
 func andNot(dst, a, b []byte) {
-	l := 0
+	l := uint64(0)
 	if hasAVX2() {
 		l = uint64(len(a)) >> 8
 		if l != 0 {

@@ -3,7 +3,7 @@
 #include "textflag.h"
 
 // func andNEON(dst *byte, a *byte, b *byte, l uint64)
-TEXT ·andNEON(SB), NOSPLIT, $0-32
+TEXT ·andNEON(SB), NOSPLIT|NOFRAME, $0
     MOVD dst+0(FP), R0
     MOVD a+8(FP), R1
     MOVD b+16(FP), R2

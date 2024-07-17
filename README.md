@@ -1,7 +1,7 @@
 go-and
 ======
 
-Fast bitwise and for `[]byte` slices.
+Fast bitwise and, or and andn for `[]byte` slices.
 
 ```go
 import "github.com/bwesterb/go-and"

@@ -3,6 +3,7 @@ package and
 
 import (
 	"encoding/binary"
+	"math/bits"
 )
 
 // Writes bitwise and of a and b to dst.
@@ -81,4 +82,25 @@ func andNotGeneric(dst, a, b []byte) {
 	for ; i < len(a); i++ {
 		dst[i] = (^a[i]) & b[i]
 	}
+}
+
+// Writes bitwise and of not(a) and b to dst.
+//
+// Panics if len(a) ≠ len(b), or len(dst) ≠ len(a).
+func Popcnt(a []byte) int {
+	return popcnt(a)
+}
+
+func popcntGeneric(a []byte) int {
+	var ret int
+	i := 0
+
+	for ; i <= len(a)-8; i += 8 {
+		ret += bits.OnesCount64(binary.LittleEndian.Uint64(a[i:]))
+	}
+
+	for ; i < len(a); i++ {
+		ret += bits.OnesCount8(a[i])
+	}
+	return ret
 }

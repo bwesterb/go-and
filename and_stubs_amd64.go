@@ -16,3 +16,8 @@ func orAVX2(dst *byte, a *byte, b *byte, l uint64)
 //
 //go:noescape
 func andNotAVX2(dst *byte, a *byte, b *byte, l uint64)
+
+// Zero the return register
+//
+//go:noescape
+func popcntAsm(a *byte, l uint64) int

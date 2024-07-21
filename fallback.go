@@ -13,3 +13,7 @@ func or(dst, a, b []byte) {
 func andNot(dst, a, b []byte) {
 	andNotGeneric(dst, a, b)
 }
+
+func popcnt(a []byte) int {
+	return popcntGeneric(a)
+}

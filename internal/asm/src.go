@@ -10,6 +10,7 @@ func main() {
 	gen("and", VPAND, "Sets dst to the bitwise and of a and b")
 	gen("or", VPOR, "Sets dst to the bitwise or of a and b")
 	gen("andNot", VPANDN, "Sets dst to the bitwise and of not(a) and b")
+	genPopcnt()
 	Generate()
 }
 
@@ -46,5 +47,42 @@ func gen(name string, op func(Op, Op, Op), doc string) {
 	SUBQ(U32(1), l)
 	JNZ(LabelRef("loop"))
 
+	RET()
+}
+
+func genPopcnt() {
+	TEXT("popcntAsm", NOSPLIT, "func(a *byte, l uint64) int")
+
+	Pragma("noescape")
+
+	Doc("Counts the number of bits set in a assuming all are 64*l bytes")
+	a := Load(Param("a"), GP64())
+	l := Load(Param("l"), GP64())
+
+	ret := GP64()
+
+	as := []Op{GP64(), GP64(), GP64(), GP64(), GP64(), GP64(), GP64(), GP64()}
+	intermediates := []Op{GP64(), GP64(), GP64(), GP64(), GP64(), GP64(), GP64(), GP64()}
+
+	Doc("Zero the return register")
+	XORQ(ret, ret)
+
+	Label("loop")
+
+	for i := 0; i < len(as); i++ {
+		MOVQ(Mem{Base: a, Disp: 8 * i}, as[i])
+	}
+	for i := 0; i < len(as); i++ {
+		POPCNTQ(as[i], intermediates[i])
+	}
+	for i := 0; i < len(as); i++ {
+		ADDQ(intermediates[i], ret)
+	}
+
+	ADDQ(U32(len(as)*8), a)
+	SUBQ(U32(1), l)
+	JNZ(LabelRef("loop"))
+
+	Store(ret, ReturnIndex(0))
 	RET()
 }

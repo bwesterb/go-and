@@ -35,3 +35,17 @@ func andNot(dst, a, b []byte) {
 	}
 	andNotGeneric(dst[l:], a[l:], b[l:])
 }
+
+func popcnt(a []byte) int {
+	l := uint64(0)
+	var ret int
+	if hasPopcnt() {
+		l = uint64(len(a)) >> 6
+		if l != 0 {
+			ret = popcntAsm(&a[0], l)
+		}
+		l <<= 6
+	}
+	ret += popcntGeneric(a[l:])
+	return ret
+}

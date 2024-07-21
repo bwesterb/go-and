@@ -28,3 +28,8 @@ func andNot(dst, a, b []byte) {
 	// TODO: Write a NEON version for this
 	andNotGeneric(dst, a, b)
 }
+
+func popcnt(a []byte) int {
+	// TODO: Write a NEON version for this
+	return popcntGeneric(a)
+}

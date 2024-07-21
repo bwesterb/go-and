@@ -145,3 +145,41 @@ loop:
 	SUBQ    $0x00000001, BX
 	JNZ     loop
 	RET
+
+// func popcntAsm(a *byte, l uint64) int
+// Requires: POPCNT
+TEXT ·popcntAsm(SB), NOSPLIT, $0-24
+	MOVQ a+0(FP), AX
+	MOVQ l+8(FP), CX
+	XORQ DX, DX
+
+loop:
+	MOVQ    (AX), BX
+	MOVQ    8(AX), SI
+	MOVQ    16(AX), DI
+	MOVQ    24(AX), R8
+	MOVQ    32(AX), R9
+	MOVQ    40(AX), R10
+	MOVQ    48(AX), R11
+	MOVQ    56(AX), R12
+	POPCNTQ BX, BX
+	POPCNTQ SI, SI
+	POPCNTQ DI, DI
+	POPCNTQ R8, R8
+	POPCNTQ R9, R9
+	POPCNTQ R10, R10
+	POPCNTQ R11, R11
+	POPCNTQ R12, R12
+	ADDQ    BX, DX
+	ADDQ    SI, DX
+	ADDQ    DI, DX
+	ADDQ    R8, DX
+	ADDQ    R9, DX
+	ADDQ    R10, DX
+	ADDQ    R11, DX
+	ADDQ    R12, DX
+	ADDQ    $0x00000040, AX
+	SUBQ    $0x00000001, CX
+	JNZ     loop
+	MOVQ    DX, ret+16(FP)
+	RET

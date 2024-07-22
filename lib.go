@@ -104,3 +104,14 @@ func popcntGeneric(a []byte) int {
 	}
 	return ret
 }
+
+// Memset sets dst[*] to b.
+func Memset(dst []byte, b byte) {
+	memset(dst, b)
+}
+
+func memsetGeneric(dst []byte, b byte) {
+	for i := range dst {
+		dst[i] = b
+	}
+}

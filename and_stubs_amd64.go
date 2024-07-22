@@ -21,3 +21,8 @@ func andNotAVX2(dst *byte, a *byte, b *byte, l uint64)
 //
 //go:noescape
 func popcntAsm(a *byte, l uint64) int
+
+// Sets each byte in dst to b
+//
+//go:noescape
+func memsetAVX2(dst *byte, l uint64, b byte)

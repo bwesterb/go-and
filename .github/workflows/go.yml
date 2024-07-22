@@ -26,3 +26,26 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+
+    - name: Build for GOAMD64=v2
+      run: go build -v ./...
+      env:
+        GOAMD64: v2
+
+    - name: Build for GOAMD64=v3
+      run: go build -v ./...
+      env:
+        GOAMD64: v3
+
+    - name: Build purego
+      run: go build -v -tags purego ./...
+
+    - name: Build for GOARCH=arm64
+      run: go build -v ./...
+      env:
+        GOARCH: arm64
+
+    - name: Build for GOARCH=386
+      run: go build -v ./...
+      env:
+        GOARCH: 386

@@ -17,3 +17,7 @@ func andNot(dst, a, b []byte) {
 func popcnt(a []byte) int {
 	return popcntGeneric(a)
 }
+
+func memset(dst []byte, b byte) {
+	return memsetGeneric(dst, b)
+}

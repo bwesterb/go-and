@@ -33,3 +33,8 @@ func popcnt(a []byte) int {
 	// TODO: Write a NEON version for this
 	return popcntGeneric(a)
 }
+
+func memset(dst []byte, b byte) {
+	// TODO: Write a NEON version for this
+	memsetGeneric(dst, b)
+}

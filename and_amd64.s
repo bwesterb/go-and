@@ -183,3 +183,17 @@ loop:
 	JNZ     loop
 	MOVQ    DX, ret+16(FP)
 	RET
+
+// func memsetAVX2(dst *byte, l uint64, b byte)
+// Requires: AVX, AVX2
+TEXT ·memsetAVX2(SB), NOSPLIT, $0-17
+	MOVQ         dst+0(FP), AX
+	MOVQ         l+8(FP), CX
+	VPBROADCASTB b+16(FP), Y0
+
+loop:
+	VMOVDQU Y0, (AX)
+	ADDQ    $0x00000020, AX
+	SUBQ    $0x00000001, CX
+	JNZ     loop
+	RET

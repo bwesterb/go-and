@@ -11,6 +11,7 @@ func main() {
 	gen("or", VPOR, "Sets dst to the bitwise or of a and b")
 	gen("andNot", VPANDN, "Sets dst to the bitwise and of not(a) and b")
 	genPopcnt()
+	genMemset()
 	Generate()
 }
 
@@ -84,5 +85,35 @@ func genPopcnt() {
 	JNZ(LabelRef("loop"))
 
 	Store(ret, ReturnIndex(0))
+	RET()
+}
+
+func genMemset() {
+	const rounds = 1
+	TEXT("memsetAVX2", NOSPLIT, "func(dst *byte, l uint64, b byte)")
+
+	Pragma("noescape")
+
+	Doc("Sets each byte in dst to b")
+	dst := Load(Param("dst"), GP64())
+	l := Load(Param("l"), GP64())
+
+	bRepeated := YMM()
+	b, err := Param("b").Resolve()
+	if err != nil {
+		panic(err)
+	}
+	VPBROADCASTB(b.Addr, bRepeated)
+
+	Label("loop")
+
+	for i := 0; i < rounds; i++ {
+		VMOVDQU(bRepeated, Mem{Base: dst, Disp: 32 * i})
+	}
+
+	ADDQ(U32(32*rounds), dst)
+	SUBQ(U32(1), l)
+	JNZ(LabelRef("loop"))
+
 	RET()
 }

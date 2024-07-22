@@ -49,3 +49,15 @@ func popcnt(a []byte) int {
 	ret += popcntGeneric(a[l:])
 	return ret
 }
+
+func memset(dst []byte, b byte) {
+	l := uint64(0)
+	if hasAVX2() {
+		l = uint64(len(dst)) >> 5
+		if l != 0 {
+			memsetAVX2(&dst[0], l, b)
+		}
+		l <<= 5
+	}
+	memsetGeneric(dst[l:], b)
+}

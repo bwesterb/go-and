@@ -111,7 +111,19 @@ func Memset(dst []byte, b byte) {
 }
 
 func memsetGeneric(dst []byte, b byte) {
-	for i := range dst {
+	if b == 0 {
+		// Special case that the Go compiler can optimize.
+		for i := range dst {
+			dst[i] = 0
+		}
+		return
+	}
+	eightB := 0x0101010101010101 * uint64(b)
+	i := 0
+	for ; i <= len(dst)-8; i += 8 {
+		binary.LittleEndian.PutUint64(dst[i:], eightB)
+	}
+	for ; i < len(dst); i++ {
 		dst[i] = b
 	}
 }

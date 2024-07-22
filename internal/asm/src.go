@@ -7,6 +7,8 @@ import (
 )
 
 func main() {
+	ConstraintExpr("!purego")
+
 	gen("and", VPAND, "Sets dst to the bitwise and of a and b")
 	gen("or", VPOR, "Sets dst to the bitwise or of a and b")
 	gen("andNot", VPANDN, "Sets dst to the bitwise and of not(a) and b")

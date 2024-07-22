@@ -1,3 +1,5 @@
+//go:build !purego
+
 package and
 
 func and(dst, a, b []byte) {

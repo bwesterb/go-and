@@ -8,7 +8,25 @@ import (
 	"testing"
 )
 
-func testAgainstGeneric(t *testing.T, fancy, generic func(dst, a, b []byte), size int) {
+func andNaive(dst, a, b []byte) {
+	for i := range dst {
+		dst[i] = a[i] & b[i]
+	}
+}
+
+func orNaive(dst, a, b []byte) {
+	for i := range dst {
+		dst[i] = a[i] | b[i]
+	}
+}
+
+func andNotNaive(dst, a, b []byte) {
+	for i := range dst {
+		dst[i] = (^a[i]) & b[i]
+	}
+}
+
+func testAgainst(t *testing.T, fancy, generic func(dst, a, b []byte), size int) {
 	a := make([]byte, size)
 	b := make([]byte, size)
 	c1 := make([]byte, size)
@@ -25,32 +43,38 @@ func testAgainstGeneric(t *testing.T, fancy, generic func(dst, a, b []byte), siz
 	}
 }
 
-func TestAndAgainstGeneric(t *testing.T) {
+func TestAnd(t *testing.T) {
 	for i := 0; i < 20; i++ {
 		size := 1 << i
-		testAgainstGeneric(t, And, andGeneric, size)
+		testAgainst(t, And, andNaive, size)
+		testAgainst(t, andGeneric, andNaive, size)
 		for j := 0; j < 10; j++ {
-			testAgainstGeneric(t, And, andGeneric, size+rand.IntN(100))
+			testAgainst(t, And, andNaive, size+rand.IntN(100))
+			testAgainst(t, andGeneric, andNaive, size+rand.IntN(100))
 		}
 	}
 }
 
-func TestOrAgainstGeneric(t *testing.T) {
+func TestOr(t *testing.T) {
 	for i := 0; i < 20; i++ {
 		size := 1 << i
-		testAgainstGeneric(t, Or, orGeneric, size)
+		testAgainst(t, Or, orNaive, size)
+		testAgainst(t, orGeneric, orNaive, size)
 		for j := 0; j < 10; j++ {
-			testAgainstGeneric(t, Or, orGeneric, size+rand.IntN(100))
+			testAgainst(t, Or, orNaive, size+rand.IntN(100))
+			testAgainst(t, orGeneric, orNaive, size+rand.IntN(100))
 		}
 	}
 }
 
-func TestAndNotAgainstGeneric(t *testing.T) {
+func TestAndNot(t *testing.T) {
 	for i := 0; i < 20; i++ {
 		size := 1 << i
-		testAgainstGeneric(t, AndNot, andNotGeneric, size)
+		testAgainst(t, AndNot, andNotNaive, size)
+		testAgainst(t, andNotGeneric, andNotNaive, size)
 		for j := 0; j < 10; j++ {
-			testAgainstGeneric(t, AndNot, andNotGeneric, size+rand.IntN(100))
+			testAgainst(t, AndNot, andNotNaive, size+rand.IntN(100))
+			testAgainst(t, andNotGeneric, andNotNaive, size+rand.IntN(100))
 		}
 	}
 }
@@ -79,6 +103,18 @@ func BenchmarkAndGeneric(b *testing.B) {
 	}
 }
 
+func BenchmarkAndNaive(b *testing.B) {
+	b.StopTimer()
+	size := 1000000
+	a := make([]byte, size)
+	bb := make([]byte, size)
+	b.SetBytes(int64(size))
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		andNaive(a, a, bb)
+	}
+}
+
 func BenchmarkOr(b *testing.B) {
 	b.StopTimer()
 	size := 1000000
@@ -103,6 +139,18 @@ func BenchmarkOrGeneric(b *testing.B) {
 	}
 }
 
+func BenchmarkOrNaive(b *testing.B) {
+	b.StopTimer()
+	size := 1000000
+	a := make([]byte, size)
+	bb := make([]byte, size)
+	b.SetBytes(int64(size))
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		orNaive(a, a, bb)
+	}
+}
+
 func BenchmarkAndNot(b *testing.B) {
 	b.StopTimer()
 	size := 1000000
@@ -124,5 +172,17 @@ func BenchmarkAndNotGeneric(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		andNotGeneric(a, a, bb)
+	}
+}
+
+func BenchmarkAndNotNaive(b *testing.B) {
+	b.StopTimer()
+	size := 1000000
+	a := make([]byte, size)
+	bb := make([]byte, size)
+	b.SetBytes(int64(size))
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		andNotNaive(a, a, bb)
 	}
 }

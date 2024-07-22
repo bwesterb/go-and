@@ -5,6 +5,12 @@ import (
 	"testing"
 )
 
+func memsetNaive(dst []byte, b byte) {
+	for i := range dst {
+		dst[i] = b
+	}
+}
+
 func testMemset(t *testing.T, size int) {
 	a := make([]byte, size)
 	Memset(a, 0xff)
@@ -44,5 +50,16 @@ func BenchmarkMemsetGeneric(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		memsetGeneric(a, 0xff)
+	}
+}
+
+func BenchmarkMemsetNaive(b *testing.B) {
+	b.StopTimer()
+	size := 1000000
+	a := make([]byte, size)
+	b.SetBytes(int64(size))
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		memsetNaive(a, 0xff)
 	}
 }

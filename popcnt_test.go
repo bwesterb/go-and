@@ -1,9 +1,18 @@
 package and
 
 import (
+	"math/bits"
 	"math/rand/v2"
 	"testing"
 )
+
+func popcntNaive(a []byte) int {
+	var ret int
+	for i := range a {
+		ret += bits.OnesCount8(a[i])
+	}
+	return ret
+}
 
 func testPopcntAgainstGeneric(t *testing.T, size int) {
 	a := make([]byte, size)
@@ -47,5 +56,16 @@ func BenchmarkPopcntGeneric(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		_ = popcntGeneric(a)
+	}
+}
+
+func BenchmarkPopcntNaive(b *testing.B) {
+	b.StopTimer()
+	size := 1000000
+	a := make([]byte, size)
+	b.SetBytes(int64(size))
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		_ = popcntNaive(a)
 	}
 }

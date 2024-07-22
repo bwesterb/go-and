@@ -19,5 +19,5 @@ func popcnt(a []byte) int {
 }
 
 func memset(dst []byte, b byte) {
-	return memsetGeneric(dst, b)
+	memsetGeneric(dst, b)
 }

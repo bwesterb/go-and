@@ -1,3 +1,5 @@
+//go:build !purego
+
 package and
 
 //go:noescape

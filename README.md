@@ -1,7 +1,9 @@
 go-and
 ======
 
-Fast bitwise and, or and andn for `[]byte` slices.
+[![Go Reference](https://pkg.go.dev/badge/github.com/bwesterb/go-and.svg)](https://pkg.go.dev/github.com/bwesterb/go-and)
+
+Fast bitwise and, or, andn, popcount and memset for `[]byte` slices.
 
 ```go
 import "github.com/bwesterb/go-and"

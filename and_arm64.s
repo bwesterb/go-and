@@ -276,3 +276,25 @@ loop:
     MOVD R0, ret+16(FP)
 
     RET
+
+// func memsetNEON(dst *byte, l uint64, b byte)
+TEXT ·memsetNEON(SB), NOSPLIT, $0-17
+    MOVD dst+0(FP), R1
+    MOVD l+8(FP), R2
+    MOVB b+16(FP), R0
+
+    VDUP R0, V0.B16
+    VORR V0.B16, V0.B16, V1.B16
+    VORR V0.B16, V0.B16, V2.B16
+    VORR V0.B16, V0.B16, V3.B16
+
+loop:
+    VST1.P [ V0.B16,  V1.B16,  V2.B16,  V3.B16], 64(R1)
+    VST1.P [ V0.B16,  V1.B16,  V2.B16,  V3.B16], 64(R1)
+    VST1.P [ V0.B16,  V1.B16,  V2.B16,  V3.B16], 64(R1)
+    VST1.P [ V0.B16,  V1.B16,  V2.B16,  V3.B16], 64(R1)
+
+    SUBS $1, R2, R2
+    CBNZ R2, loop
+
+    RET

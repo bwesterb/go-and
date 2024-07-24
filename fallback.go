@@ -10,6 +10,10 @@ func or(dst, a, b []byte) {
 	orGeneric(dst, a, b)
 }
 
+func xor(dst, a, b []byte) {
+	xorGeneric(dst, a, b)
+}
+
 func andNot(dst, a, b []byte) {
 	andNotGeneric(dst, a, b)
 }

@@ -26,6 +26,18 @@ func or(dst, a, b []byte) {
 	orGeneric(dst[l:], a[l:], b[l:])
 }
 
+func xor(dst, a, b []byte) {
+	l := uint64(0)
+	if hasAVX2() {
+		l = uint64(len(a)) >> 8
+		if l != 0 {
+			xorAVX2(&dst[0], &a[0], &b[0], l)
+		}
+		l <<= 8
+	}
+	xorGeneric(dst[l:], a[l:], b[l:])
+}
+
 func andNot(dst, a, b []byte) {
 	l := uint64(0)
 	if hasAVX2() {

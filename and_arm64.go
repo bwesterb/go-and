@@ -12,6 +12,9 @@ func orNEON(dst, a, b *byte, l uint64)
 func xorNEON(dst, a, b *byte, l uint64)
 
 //go:noescape
+func andNotNEON(dst, a, b *byte, l uint64)
+
+//go:noescape
 func popcntNEON(a *byte, l uint64) uint64
 
 func and(dst, a, b []byte) {
@@ -42,8 +45,12 @@ func xor(dst, a, b []byte) {
 }
 
 func andNot(dst, a, b []byte) {
-	// TODO: Write a NEON version for this
-	andNotGeneric(dst, a, b)
+	l := uint64(len(a)) >> 8
+	if l != 0 {
+		andNotNEON(&dst[0], &a[0], &b[0], l)
+	}
+	l <<= 8
+	andNotGeneric(dst[l:], a[l:], b[l:])
 }
 
 func popcnt(a []byte) int {

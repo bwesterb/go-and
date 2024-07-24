@@ -3,13 +3,13 @@
 package and
 
 //go:noescape
-func andNEON(dst, a, b *byte, len uint64)
+func andNEON(dst, a, b *byte, l uint64)
 
 //go:noescape
-func orNEON(dst, a, b *byte, len uint64)
+func orNEON(dst, a, b *byte, l uint64)
 
 //go:noescape
-func popcntNEON(a *byte, len uint64) uint64
+func popcntNEON(a *byte, l uint64) uint64
 
 func and(dst, a, b []byte) {
 	l := uint64(len(a)) >> 8

@@ -8,6 +8,9 @@ func andNEON(dst, a, b *byte, len uint64)
 //go:noescape
 func orNEON(dst, a, b *byte, len uint64)
 
+//go:noescape
+func popcntNEON(a *byte, len uint64) uint64
+
 func and(dst, a, b []byte) {
 	l := uint64(len(a)) >> 8
 	if l != 0 {
@@ -32,8 +35,13 @@ func andNot(dst, a, b []byte) {
 }
 
 func popcnt(a []byte) int {
-	// TODO: Write a NEON version for this
-	return popcntGeneric(a)
+	ret := 0
+	l := uint64(len(a)) >> 8
+	if l != 0 {
+		ret = int(popcntNEON(&a[0], l))
+		l <<= 8
+	}
+	return ret + popcntGeneric(a[l:])
 }
 
 func memset(dst []byte, b byte) {

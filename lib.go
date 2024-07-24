@@ -58,6 +58,32 @@ func orGeneric(dst, a, b []byte) {
 	}
 }
 
+// Writes bitwise xor of a and b to dst.
+//
+// Panics if len(a) ≠ len(b), or len(dst) ≠ len(a).
+func Xor(dst, a, b []byte) {
+	if len(a) != len(b) || len(b) != len(dst) {
+		panic("lengths of a, b and dst must be equal")
+	}
+
+	xor(dst, a, b)
+}
+
+func xorGeneric(dst, a, b []byte) {
+	i := 0
+
+	for ; i <= len(a)-8; i += 8 {
+		binary.LittleEndian.PutUint64(
+			dst[i:],
+			binary.LittleEndian.Uint64(a[i:])^binary.LittleEndian.Uint64(b[i:]),
+		)
+	}
+
+	for ; i < len(a); i++ {
+		dst[i] = a[i] ^ b[i]
+	}
+}
+
 // Writes bitwise and of not(a) and b to dst.
 //
 // Panics if len(a) ≠ len(b), or len(dst) ≠ len(a).

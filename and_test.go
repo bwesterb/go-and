@@ -8,6 +8,12 @@ import (
 	"testing"
 )
 
+func xorNaive(dst, a, b []byte) {
+	for i := range dst {
+		dst[i] = a[i] ^ b[i]
+	}
+}
+
 func andNaive(dst, a, b []byte) {
 	for i := range dst {
 		dst[i] = a[i] & b[i]
@@ -51,6 +57,18 @@ func TestAnd(t *testing.T) {
 		for j := 0; j < 10; j++ {
 			testAgainst(t, And, andNaive, size+rand.IntN(100))
 			testAgainst(t, andGeneric, andNaive, size+rand.IntN(100))
+		}
+	}
+}
+
+func TestXor(t *testing.T) {
+	for i := 0; i < 20; i++ {
+		size := 1 << i
+		testAgainst(t, Xor, xorNaive, size)
+		testAgainst(t, xorGeneric, xorNaive, size)
+		for j := 0; j < 10; j++ {
+			testAgainst(t, Xor, xorNaive, size+rand.IntN(100))
+			testAgainst(t, xorGeneric, xorNaive, size+rand.IntN(100))
 		}
 	}
 }
@@ -148,6 +166,42 @@ func BenchmarkOrNaive(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		orNaive(a, a, bb)
+	}
+}
+
+func BenchmarkXor(b *testing.B) {
+	b.StopTimer()
+	size := 1000000
+	a := make([]byte, size)
+	bb := make([]byte, size)
+	b.SetBytes(int64(size))
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		Xor(a, a, bb)
+	}
+}
+
+func BenchmarkXorGeneric(b *testing.B) {
+	b.StopTimer()
+	size := 1000000
+	a := make([]byte, size)
+	bb := make([]byte, size)
+	b.SetBytes(int64(size))
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		xorGeneric(a, a, bb)
+	}
+}
+
+func BenchmarkXorNaive(b *testing.B) {
+	b.StopTimer()
+	size := 1000000
+	a := make([]byte, size)
+	bb := make([]byte, size)
+	b.SetBytes(int64(size))
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		xorNaive(a, a, bb)
 	}
 }
 

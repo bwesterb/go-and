@@ -99,7 +99,7 @@ func TestAndNot(t *testing.T) {
 
 func BenchmarkAnd(b *testing.B) {
 	b.StopTimer()
-	size := 1000000
+	size := 32000
 	a := make([]byte, size)
 	bb := make([]byte, size)
 	b.SetBytes(int64(size))
@@ -111,7 +111,7 @@ func BenchmarkAnd(b *testing.B) {
 
 func BenchmarkAndGeneric(b *testing.B) {
 	b.StopTimer()
-	size := 1000000
+	size := 32000
 	a := make([]byte, size)
 	bb := make([]byte, size)
 	b.SetBytes(int64(size))
@@ -123,7 +123,7 @@ func BenchmarkAndGeneric(b *testing.B) {
 
 func BenchmarkAndNaive(b *testing.B) {
 	b.StopTimer()
-	size := 1000000
+	size := 32000
 	a := make([]byte, size)
 	bb := make([]byte, size)
 	b.SetBytes(int64(size))
@@ -135,7 +135,7 @@ func BenchmarkAndNaive(b *testing.B) {
 
 func BenchmarkOr(b *testing.B) {
 	b.StopTimer()
-	size := 1000000
+	size := 32000
 	a := make([]byte, size)
 	bb := make([]byte, size)
 	b.SetBytes(int64(size))
@@ -147,7 +147,7 @@ func BenchmarkOr(b *testing.B) {
 
 func BenchmarkOrGeneric(b *testing.B) {
 	b.StopTimer()
-	size := 1000000
+	size := 32000
 	a := make([]byte, size)
 	bb := make([]byte, size)
 	b.SetBytes(int64(size))
@@ -159,7 +159,7 @@ func BenchmarkOrGeneric(b *testing.B) {
 
 func BenchmarkOrNaive(b *testing.B) {
 	b.StopTimer()
-	size := 1000000
+	size := 32000
 	a := make([]byte, size)
 	bb := make([]byte, size)
 	b.SetBytes(int64(size))
@@ -171,7 +171,7 @@ func BenchmarkOrNaive(b *testing.B) {
 
 func BenchmarkXor(b *testing.B) {
 	b.StopTimer()
-	size := 1000000
+	size := 32000
 	a := make([]byte, size)
 	bb := make([]byte, size)
 	b.SetBytes(int64(size))
@@ -183,7 +183,7 @@ func BenchmarkXor(b *testing.B) {
 
 func BenchmarkXorGeneric(b *testing.B) {
 	b.StopTimer()
-	size := 1000000
+	size := 32000
 	a := make([]byte, size)
 	bb := make([]byte, size)
 	b.SetBytes(int64(size))
@@ -195,7 +195,7 @@ func BenchmarkXorGeneric(b *testing.B) {
 
 func BenchmarkXorNaive(b *testing.B) {
 	b.StopTimer()
-	size := 1000000
+	size := 32000
 	a := make([]byte, size)
 	bb := make([]byte, size)
 	b.SetBytes(int64(size))
@@ -207,7 +207,7 @@ func BenchmarkXorNaive(b *testing.B) {
 
 func BenchmarkAndNot(b *testing.B) {
 	b.StopTimer()
-	size := 1000000
+	size := 32000
 	a := make([]byte, size)
 	bb := make([]byte, size)
 	b.SetBytes(int64(size))
@@ -219,7 +219,7 @@ func BenchmarkAndNot(b *testing.B) {
 
 func BenchmarkAndNotGeneric(b *testing.B) {
 	b.StopTimer()
-	size := 1000000
+	size := 32000
 	a := make([]byte, size)
 	bb := make([]byte, size)
 	b.SetBytes(int64(size))
@@ -231,7 +231,7 @@ func BenchmarkAndNotGeneric(b *testing.B) {
 
 func BenchmarkAndNotNaive(b *testing.B) {
 	b.StopTimer()
-	size := 1000000
+	size := 32000
 	a := make([]byte, size)
 	bb := make([]byte, size)
 	b.SetBytes(int64(size))

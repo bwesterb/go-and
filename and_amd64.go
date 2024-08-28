@@ -10,6 +10,12 @@ func and(dst, a, b []byte) {
 			andAVX2(&dst[0], &a[0], &b[0], l)
 		}
 		l <<= 8
+	} else if hasAVX() {
+		l = uint64(len(a)) >> 7
+		if l != 0 {
+			andAVX(&dst[0], &a[0], &b[0], l)
+		}
+		l <<= 7
 	}
 	andGeneric(dst[l:], a[l:], b[l:])
 }
@@ -22,6 +28,12 @@ func or(dst, a, b []byte) {
 			orAVX2(&dst[0], &a[0], &b[0], l)
 		}
 		l <<= 8
+	} else if hasAVX() {
+		l = uint64(len(a)) >> 7
+		if l != 0 {
+			orAVX(&dst[0], &a[0], &b[0], l)
+		}
+		l <<= 7
 	}
 	orGeneric(dst[l:], a[l:], b[l:])
 }
@@ -34,6 +46,12 @@ func xor(dst, a, b []byte) {
 			xorAVX2(&dst[0], &a[0], &b[0], l)
 		}
 		l <<= 8
+	} else if hasAVX() {
+		l = uint64(len(a)) >> 7
+		if l != 0 {
+			xorAVX(&dst[0], &a[0], &b[0], l)
+		}
+		l <<= 7
 	}
 	xorGeneric(dst[l:], a[l:], b[l:])
 }
@@ -46,6 +64,12 @@ func andNot(dst, a, b []byte) {
 			andNotAVX2(&dst[0], &a[0], &b[0], l)
 		}
 		l <<= 8
+	} else if hasAVX() {
+		l = uint64(len(a)) >> 7
+		if l != 0 {
+			andNotAVX(&dst[0], &a[0], &b[0], l)
+		}
+		l <<= 7
 	}
 	andNotGeneric(dst[l:], a[l:], b[l:])
 }
@@ -72,6 +96,12 @@ func memset(dst []byte, b byte) {
 			memsetAVX2(&dst[0], l, b)
 		}
 		l <<= 5
+	} else if hasAVX() {
+		l = uint64(len(dst)) >> 4
+		if l != 0 {
+			memsetAVX(&dst[0], l, b)
+		}
+		l <<= 4
 	}
 	memsetGeneric(dst[l:], b)
 }

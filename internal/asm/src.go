@@ -2,6 +2,8 @@
 package main
 
 import (
+	"fmt"
+
 	. "github.com/mmcloughlin/avo/build"
 	. "github.com/mmcloughlin/avo/operand"
 )
@@ -9,45 +11,88 @@ import (
 func main() {
 	ConstraintExpr("!purego")
 
-	gen("and", VPAND, "Sets dst to the bitwise and of a and b")
-	gen("or", VPOR, "Sets dst to the bitwise or of a and b")
-	gen("xor", VPXOR, "Sets dst to the bitwise xor of a and b")
-	gen("andNot", VPANDN, "Sets dst to the bitwise and of not(a) and b")
+	gen("and", VPAND, AVX2, "Sets dst to the bitwise and of a and b")
+	gen("and", VPAND, AVX, "Sets dst to the bitwise and of a and b")
+	gen("or", VPOR, AVX2, "Sets dst to the bitwise or of a and b")
+	gen("or", VPOR, AVX, "Sets dst to the bitwise or of a and b")
+	gen("xor", VPXOR, AVX2, "Sets dst to the bitwise xor of a and b")
+	gen("xor", VPXOR, AVX, "Sets dst to the bitwise xor of a and b")
+	gen("andNot", VPANDN, AVX2, "Sets dst to the bitwise and of not(a) and b")
+	gen("andNot", VPANDN, AVX, "Sets dst to the bitwise and of not(a) and b")
 	genPopcnt()
-	genMemset()
+	genMemset(AVX2)
+	genMemset(AVX)
 	Generate()
 }
 
-func gen(name string, op func(Op, Op, Op), doc string) {
-	TEXT(name+"AVX2", NOSPLIT, "func(dst, a, b *byte, l uint64)")
+type AVXLevel string
+
+var (
+	AVX  AVXLevel = "AVX"
+	AVX2 AVXLevel = "AVX2"
+)
+
+func (a AVXLevel) Bits() int {
+	switch a {
+	case AVX:
+		return 128
+	case AVX2:
+		return 256
+	default:
+		panic("invalid level")
+	}
+}
+
+func (a AVXLevel) Bytes() int {
+	return a.Bits() / 8
+}
+
+func (a AVXLevel) CreateRegister() Op {
+	switch a {
+	case AVX:
+		return XMM()
+	case AVX2:
+		return YMM()
+	default:
+		panic("invalid level")
+	}
+}
+
+func gen(name string, op func(Op, Op, Op), avxLevel AVXLevel, doc string) {
+	TEXT(name+string(avxLevel), NOSPLIT, "func(dst, a, b *byte, l uint64)")
 
 	Pragma("noescape")
 
-	Doc(doc + " assuming all are 256*l bytes")
+	const rounds = 8
+
+	Doc(fmt.Sprintf("%s assuming all are %d*l bytes", doc, avxLevel.Bits()))
 	a := Load(Param("a"), GP64())
 	b := Load(Param("b"), GP64())
 	dst := Load(Param("dst"), GP64())
 	l := Load(Param("l"), GP64())
 
-	as := []Op{YMM(), YMM(), YMM(), YMM(), YMM(), YMM(), YMM(), YMM()}
-	bs := []Op{YMM(), YMM(), YMM(), YMM(), YMM(), YMM(), YMM(), YMM()}
+	var as, bs []Op
+	for i := 0; rounds > i; i++ {
+		as = append(as, avxLevel.CreateRegister())
+		bs = append(bs, avxLevel.CreateRegister())
+	}
 
 	Label("loop")
 
 	for i := 0; i < len(as); i++ {
-		VMOVDQU(Mem{Base: a, Disp: 32 * i}, as[i])
-		VMOVDQU(Mem{Base: b, Disp: 32 * i}, bs[i])
+		VMOVDQU(Mem{Base: a, Disp: avxLevel.Bytes() * i}, as[i])
+		VMOVDQU(Mem{Base: b, Disp: avxLevel.Bytes() * i}, bs[i])
 	}
 	for i := 0; i < len(as); i++ {
 		op(bs[i], as[i], bs[i])
 	}
 	for i := 0; i < len(as); i++ {
-		VMOVDQU(bs[i], Mem{Base: dst, Disp: 32 * i})
+		VMOVDQU(bs[i], Mem{Base: dst, Disp: avxLevel.Bytes() * i})
 	}
 
-	ADDQ(U32(256), a)
-	ADDQ(U32(256), b)
-	ADDQ(U32(256), dst)
+	ADDQ(U32(avxLevel.Bytes()*rounds), a)
+	ADDQ(U32(avxLevel.Bytes()*rounds), b)
+	ADDQ(U32(avxLevel.Bytes()*rounds), dst)
 	SUBQ(U32(1), l)
 	JNZ(LabelRef("loop"))
 
@@ -91,9 +136,9 @@ func genPopcnt() {
 	RET()
 }
 
-func genMemset() {
+func genMemset(avxLevel AVXLevel) {
 	const rounds = 1
-	TEXT("memsetAVX2", NOSPLIT, "func(dst *byte, l uint64, b byte)")
+	TEXT("memset"+string(avxLevel), NOSPLIT, "func(dst *byte, l uint64, b byte)")
 
 	Pragma("noescape")
 
@@ -101,20 +146,32 @@ func genMemset() {
 	dst := Load(Param("dst"), GP64())
 	l := Load(Param("l"), GP64())
 
-	bRepeated := YMM()
+	bRepeated := avxLevel.CreateRegister()
 	b, err := Param("b").Resolve()
 	if err != nil {
 		panic(err)
 	}
-	VPBROADCASTB(b.Addr, bRepeated)
+	if avxLevel == AVX2 {
+		VPBROADCASTB(b.Addr, bRepeated)
+	} else {
+		zeroes := GLOBL("zeroes", RODATA|NOPTR)
+		DATA(0, U32(0))
+		DATA(4, U32(0))
+		DATA(8, U32(0))
+		DATA(12, U32(0))
+		tmp := GP64()
+		MOVB(b.Addr, tmp.As8())
+		MOVQ(tmp, bRepeated)
+		VPSHUFB(zeroes.Offset(0), bRepeated, bRepeated)
+	}
 
 	Label("loop")
 
 	for i := 0; i < rounds; i++ {
-		VMOVDQU(bRepeated, Mem{Base: dst, Disp: 32 * i})
+		VMOVDQU(bRepeated, Mem{Base: dst, Disp: avxLevel.Bytes() * i})
 	}
 
-	ADDQ(U32(32*rounds), dst)
+	ADDQ(U32(avxLevel.Bytes()*rounds), dst)
 	SUBQ(U32(1), l)
 	JNZ(LabelRef("loop"))
 

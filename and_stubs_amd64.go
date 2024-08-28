@@ -9,20 +9,40 @@ package and
 //go:noescape
 func andAVX2(dst *byte, a *byte, b *byte, l uint64)
 
+// Sets dst to the bitwise and of a and b assuming all are 128*l bytes
+//
+//go:noescape
+func andAVX(dst *byte, a *byte, b *byte, l uint64)
+
 // Sets dst to the bitwise or of a and b assuming all are 256*l bytes
 //
 //go:noescape
 func orAVX2(dst *byte, a *byte, b *byte, l uint64)
+
+// Sets dst to the bitwise or of a and b assuming all are 128*l bytes
+//
+//go:noescape
+func orAVX(dst *byte, a *byte, b *byte, l uint64)
 
 // Sets dst to the bitwise xor of a and b assuming all are 256*l bytes
 //
 //go:noescape
 func xorAVX2(dst *byte, a *byte, b *byte, l uint64)
 
+// Sets dst to the bitwise xor of a and b assuming all are 128*l bytes
+//
+//go:noescape
+func xorAVX(dst *byte, a *byte, b *byte, l uint64)
+
 // Sets dst to the bitwise and of not(a) and b assuming all are 256*l bytes
 //
 //go:noescape
 func andNotAVX2(dst *byte, a *byte, b *byte, l uint64)
+
+// Sets dst to the bitwise and of not(a) and b assuming all are 128*l bytes
+//
+//go:noescape
+func andNotAVX(dst *byte, a *byte, b *byte, l uint64)
 
 // Zero the return register
 //
@@ -33,3 +53,8 @@ func popcntAsm(a *byte, l uint64) int
 //
 //go:noescape
 func memsetAVX2(dst *byte, l uint64, b byte)
+
+// Sets each byte in dst to b
+//
+//go:noescape
+func memsetAVX(dst *byte, l uint64, b byte)

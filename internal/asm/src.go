@@ -96,6 +96,7 @@ func gen(name string, op func(Op, Op, Op), avxLevel AVXLevel, doc string) {
 	SUBQ(U32(1), l)
 	JNZ(LabelRef("loop"))
 
+	VZEROALL()
 	RET()
 }
 
@@ -175,5 +176,6 @@ func genMemset(avxLevel AVXLevel) {
 	SUBQ(U32(1), l)
 	JNZ(LabelRef("loop"))
 
+	VZEROALL()
 	RET()
 }

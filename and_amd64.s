@@ -50,6 +50,7 @@ loop:
 	ADDQ    $0x00000100, DX
 	SUBQ    $0x00000001, BX
 	JNZ     loop
+	VZEROALL
 	RET
 
 // func andAVX(dst *byte, a *byte, b *byte, l uint64)
@@ -98,6 +99,7 @@ loop:
 	ADDQ    $0x00000080, DX
 	SUBQ    $0x00000001, BX
 	JNZ     loop
+	VZEROALL
 	RET
 
 // func orAVX2(dst *byte, a *byte, b *byte, l uint64)
@@ -146,6 +148,7 @@ loop:
 	ADDQ    $0x00000100, DX
 	SUBQ    $0x00000001, BX
 	JNZ     loop
+	VZEROALL
 	RET
 
 // func orAVX(dst *byte, a *byte, b *byte, l uint64)
@@ -194,6 +197,7 @@ loop:
 	ADDQ    $0x00000080, DX
 	SUBQ    $0x00000001, BX
 	JNZ     loop
+	VZEROALL
 	RET
 
 // func xorAVX2(dst *byte, a *byte, b *byte, l uint64)
@@ -242,6 +246,7 @@ loop:
 	ADDQ    $0x00000100, DX
 	SUBQ    $0x00000001, BX
 	JNZ     loop
+	VZEROALL
 	RET
 
 // func xorAVX(dst *byte, a *byte, b *byte, l uint64)
@@ -290,6 +295,7 @@ loop:
 	ADDQ    $0x00000080, DX
 	SUBQ    $0x00000001, BX
 	JNZ     loop
+	VZEROALL
 	RET
 
 // func andNotAVX2(dst *byte, a *byte, b *byte, l uint64)
@@ -338,6 +344,7 @@ loop:
 	ADDQ    $0x00000100, DX
 	SUBQ    $0x00000001, BX
 	JNZ     loop
+	VZEROALL
 	RET
 
 // func andNotAVX(dst *byte, a *byte, b *byte, l uint64)
@@ -386,6 +393,7 @@ loop:
 	ADDQ    $0x00000080, DX
 	SUBQ    $0x00000001, BX
 	JNZ     loop
+	VZEROALL
 	RET
 
 // func popcntAsm(a *byte, l uint64) int
@@ -438,6 +446,7 @@ loop:
 	ADDQ    $0x00000020, AX
 	SUBQ    $0x00000001, CX
 	JNZ     loop
+	VZEROALL
 	RET
 
 // func memsetAVX(dst *byte, l uint64, b byte)
@@ -454,6 +463,7 @@ loop:
 	ADDQ    $0x00000010, AX
 	SUBQ    $0x00000001, CX
 	JNZ     loop
+	VZEROALL
 	RET
 
 DATA zeroes<>+0(SB)/4, $0x00000000

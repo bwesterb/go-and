@@ -18,6 +18,10 @@ func andNot(dst, a, b []byte) {
 	andNotGeneric(dst, a, b)
 }
 
+func not(dst, a []byte) {
+	notGeneric(dst, a)
+}
+
 func popcnt(a []byte) int {
 	return popcntGeneric(a)
 }

@@ -56,6 +56,10 @@ func andNot(dst, a, b []byte) {
 	andNotGeneric(dst[l:], a[l:], b[l:])
 }
 
+func not(dst, a []byte) {
+	notGeneric(dst, a)
+}
+
 func popcnt(a []byte) int {
 	ret := 0
 	l := uint64(len(a)) >> 8

@@ -44,6 +44,16 @@ func andNotAVX2(dst *byte, a *byte, b *byte, l uint64)
 //go:noescape
 func andNotAVX(dst *byte, a *byte, b *byte, l uint64)
 
+// Bitwise inverts each byte of a into dst
+//
+//go:noescape
+func notAVX2(dst *byte, a *byte, l uint64)
+
+// Bitwise inverts each byte of a into dst
+//
+//go:noescape
+func notAVX(dst *byte, a *byte, l uint64)
+
 // Zero the return register
 //
 //go:noescape

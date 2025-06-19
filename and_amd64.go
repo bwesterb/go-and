@@ -74,6 +74,24 @@ func andNot(dst, a, b []byte) {
 	andNotGeneric(dst[l:], a[l:], b[l:])
 }
 
+func not(dst, a []byte) {
+	l := uint64(0)
+	if hasAVX2() {
+		l = uint64(len(a)) >> 8
+		if l != 0 {
+			notAVX2(&dst[0], &a[0], l)
+		}
+		l <<= 8
+	} else if hasAVX() {
+		l = uint64(len(a)) >> 7
+		if l != 0 {
+			notAVX(&dst[0], &a[0], l)
+		}
+		l <<= 7
+	}
+	notGeneric(dst[l:], a[l:])
+}
+
 func popcnt(a []byte) int {
 	l := uint64(0)
 	var ret int

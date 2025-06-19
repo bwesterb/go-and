@@ -396,6 +396,90 @@ loop:
 	VZEROALL
 	RET
 
+// func notAVX2(dst *byte, a *byte, l uint64)
+// Requires: AVX, AVX2
+TEXT ·notAVX2(SB), NOSPLIT, $0-24
+	MOVQ dst+0(FP), AX
+	MOVQ a+8(FP), CX
+	MOVQ l+16(FP), DX
+
+	// Initialize this register to all ones, so we can XOR with it to simulate a NOT
+	VPCMPEQB Y0, Y0, Y0
+
+loop:
+	VMOVDQU (CX), Y1
+	VMOVDQU 32(CX), Y2
+	VMOVDQU 64(CX), Y3
+	VMOVDQU 96(CX), Y4
+	VMOVDQU 128(CX), Y5
+	VMOVDQU 160(CX), Y6
+	VMOVDQU 192(CX), Y7
+	VMOVDQU 224(CX), Y8
+	VPXOR   Y1, Y0, Y1
+	VPXOR   Y2, Y0, Y2
+	VPXOR   Y3, Y0, Y3
+	VPXOR   Y4, Y0, Y4
+	VPXOR   Y5, Y0, Y5
+	VPXOR   Y6, Y0, Y6
+	VPXOR   Y7, Y0, Y7
+	VPXOR   Y8, Y0, Y8
+	VMOVDQU Y1, (AX)
+	VMOVDQU Y2, 32(AX)
+	VMOVDQU Y3, 64(AX)
+	VMOVDQU Y4, 96(AX)
+	VMOVDQU Y5, 128(AX)
+	VMOVDQU Y6, 160(AX)
+	VMOVDQU Y7, 192(AX)
+	VMOVDQU Y8, 224(AX)
+	ADDQ    $0x00000100, CX
+	ADDQ    $0x00000100, AX
+	SUBQ    $0x00000001, DX
+	JNZ     loop
+	VZEROALL
+	RET
+
+// func notAVX(dst *byte, a *byte, l uint64)
+// Requires: AVX
+TEXT ·notAVX(SB), NOSPLIT, $0-24
+	MOVQ dst+0(FP), AX
+	MOVQ a+8(FP), CX
+	MOVQ l+16(FP), DX
+
+	// Initialize this register to all ones, so we can XOR with it to simulate a NOT
+	VPCMPEQB X0, X0, X0
+
+loop:
+	VMOVDQU (CX), X1
+	VMOVDQU 16(CX), X2
+	VMOVDQU 32(CX), X3
+	VMOVDQU 48(CX), X4
+	VMOVDQU 64(CX), X5
+	VMOVDQU 80(CX), X6
+	VMOVDQU 96(CX), X7
+	VMOVDQU 112(CX), X8
+	VPXOR   X1, X0, X1
+	VPXOR   X2, X0, X2
+	VPXOR   X3, X0, X3
+	VPXOR   X4, X0, X4
+	VPXOR   X5, X0, X5
+	VPXOR   X6, X0, X6
+	VPXOR   X7, X0, X7
+	VPXOR   X8, X0, X8
+	VMOVDQU X1, (AX)
+	VMOVDQU X2, 16(AX)
+	VMOVDQU X3, 32(AX)
+	VMOVDQU X4, 48(AX)
+	VMOVDQU X5, 64(AX)
+	VMOVDQU X6, 80(AX)
+	VMOVDQU X7, 96(AX)
+	VMOVDQU X8, 112(AX)
+	ADDQ    $0x00000080, CX
+	ADDQ    $0x00000080, AX
+	SUBQ    $0x00000001, DX
+	JNZ     loop
+	VZEROALL
+	RET
+
 // func popcntAsm(a *byte, l uint64) int
 // Requires: POPCNT
 TEXT ·popcntAsm(SB), NOSPLIT, $0-24

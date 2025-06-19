@@ -19,6 +19,8 @@ func main() {
 	gen("xor", VPXOR, AVX, "Sets dst to the bitwise xor of a and b")
 	gen("andNot", VPANDN, AVX2, "Sets dst to the bitwise and of not(a) and b")
 	gen("andNot", VPANDN, AVX, "Sets dst to the bitwise and of not(a) and b")
+	genNot(AVX2)
+	genNot(AVX)
 	genPopcnt()
 	genMemset(AVX2)
 	genMemset(AVX)
@@ -92,6 +94,47 @@ func gen(name string, op func(Op, Op, Op), avxLevel AVXLevel, doc string) {
 
 	ADDQ(U32(avxLevel.Bytes()*rounds), a)
 	ADDQ(U32(avxLevel.Bytes()*rounds), b)
+	ADDQ(U32(avxLevel.Bytes()*rounds), dst)
+	SUBQ(U32(1), l)
+	JNZ(LabelRef("loop"))
+
+	VZEROALL()
+	RET()
+}
+
+func genNot(avxLevel AVXLevel) {
+	const rounds = 8
+	TEXT("not"+string(avxLevel), NOSPLIT, "func(dst, a *byte, l uint64)")
+
+	Pragma("noescape")
+
+	Doc("Bitwise inverts each byte of a into dst")
+	dst := Load(Param("dst"), GP64())
+	a := Load(Param("a"), GP64())
+	l := Load(Param("l"), GP64())
+
+	Comment("Initialize this register to all ones, so we can XOR with it to simulate a NOT")
+	allOnes := avxLevel.CreateRegister()
+	VPCMPEQB(allOnes, allOnes, allOnes)
+
+	var as []Op
+	for i := 0; rounds > i; i++ {
+		as = append(as, avxLevel.CreateRegister())
+	}
+
+	Label("loop")
+
+	for i := 0; i < len(as); i++ {
+		VMOVDQU(Mem{Base: a, Disp: avxLevel.Bytes() * i}, as[i])
+	}
+	for i := 0; i < len(as); i++ {
+		VPXOR(as[i], allOnes, as[i])
+	}
+	for i := 0; i < len(as); i++ {
+		VMOVDQU(as[i], Mem{Base: dst, Disp: avxLevel.Bytes() * i})
+	}
+
+	ADDQ(U32(avxLevel.Bytes()*rounds), a)
 	ADDQ(U32(avxLevel.Bytes()*rounds), dst)
 	SUBQ(U32(1), l)
 	JNZ(LabelRef("loop"))

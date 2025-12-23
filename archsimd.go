@@ -153,8 +153,7 @@ func not(dst, a []byte) {
 }
 
 func popcnt(a []byte) int {
-	// TODO: Use the ASM implementation here. archsimd doesn't offer features for this.
-	//       This is non-trivial because we've excluded all of and_arm64.s with build tags.
+	// Since Go 1.26, popcntGeneric is as fast as our assembly implementation.
 	return popcntGeneric(a)
 }
 

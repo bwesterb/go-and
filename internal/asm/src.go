@@ -5,11 +5,19 @@ import (
 	"fmt"
 
 	. "github.com/mmcloughlin/avo/build"
+	"github.com/mmcloughlin/avo/buildtags"
 	. "github.com/mmcloughlin/avo/operand"
 )
 
 func main() {
-	ConstraintExpr("!purego")
+	Constraints(buildtags.And(
+		buildtags.Not("purego"),
+		buildtags.Any(
+			buildtags.Not("go1.26"),
+			buildtags.Not("amd64"),
+			buildtags.Not("goexperiment.simd"),
+		),
+	))
 
 	gen("and", VPAND, AVX2, "Sets dst to the bitwise and of a and b")
 	gen("and", VPAND, AVX, "Sets dst to the bitwise and of a and b")

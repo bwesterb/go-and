@@ -15,11 +15,7 @@ func popcntNaive(a []byte) int {
 }
 
 func testPopcntAgainstGeneric(t *testing.T, size int) {
-	a := make([]byte, size)
-	rng := rand.New(rand.NewPCG(0, 0))
-	for i := range a {
-		a[i] = uint8(rng.UintN(256))
-	}
+	a := createRandomBuffer(size)
 	got := Popcnt(a)
 	want := popcntGeneric(a)
 	if got != want {
@@ -40,7 +36,7 @@ func TestPopcntAgainstGeneric(t *testing.T) {
 func BenchmarkPopcnt(b *testing.B) {
 	b.StopTimer()
 	size := 1000000
-	a := make([]byte, size)
+	a := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -51,7 +47,7 @@ func BenchmarkPopcnt(b *testing.B) {
 func BenchmarkPopcntGeneric(b *testing.B) {
 	b.StopTimer()
 	size := 1000000
-	a := make([]byte, size)
+	a := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -62,7 +58,7 @@ func BenchmarkPopcntGeneric(b *testing.B) {
 func BenchmarkPopcntNaive(b *testing.B) {
 	b.StopTimer()
 	size := 1000000
-	a := make([]byte, size)
+	a := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {

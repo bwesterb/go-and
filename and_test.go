@@ -32,16 +32,20 @@ func andNotNaive(dst, a, b []byte) {
 	}
 }
 
+func createRandomBuffer(size int) []byte {
+	ret := make([]byte, size)
+	rng := rand.New(rand.NewPCG(rand.Uint64(), 0))
+	for i := range ret {
+		ret[i] = uint8(rng.UintN(256))
+	}
+	return ret
+}
+
 func testAgainst(t *testing.T, fancy, generic func(dst, a, b []byte), size int) {
-	a := make([]byte, size)
-	b := make([]byte, size)
+	a := createRandomBuffer(size)
+	b := createRandomBuffer(size)
 	c1 := make([]byte, size)
 	c2 := make([]byte, size)
-	rng := rand.New(rand.NewPCG(0, 0))
-	for i := range a {
-		a[i] = uint8(rng.UintN(256))
-		b[i] = uint8(rng.UintN(256))
-	}
 	fancy(c1, a, b)
 	generic(c2, a, b)
 	if !bytes.Equal(c1, c2) {
@@ -100,8 +104,8 @@ func TestAndNot(t *testing.T) {
 func BenchmarkAnd(b *testing.B) {
 	b.StopTimer()
 	size := 32000
-	a := make([]byte, size)
-	bb := make([]byte, size)
+	a := createRandomBuffer(size)
+	bb := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -112,8 +116,8 @@ func BenchmarkAnd(b *testing.B) {
 func BenchmarkAndGeneric(b *testing.B) {
 	b.StopTimer()
 	size := 32000
-	a := make([]byte, size)
-	bb := make([]byte, size)
+	a := createRandomBuffer(size)
+	bb := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -124,8 +128,8 @@ func BenchmarkAndGeneric(b *testing.B) {
 func BenchmarkAndNaive(b *testing.B) {
 	b.StopTimer()
 	size := 32000
-	a := make([]byte, size)
-	bb := make([]byte, size)
+	a := createRandomBuffer(size)
+	bb := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -136,8 +140,8 @@ func BenchmarkAndNaive(b *testing.B) {
 func BenchmarkOr(b *testing.B) {
 	b.StopTimer()
 	size := 32000
-	a := make([]byte, size)
-	bb := make([]byte, size)
+	a := createRandomBuffer(size)
+	bb := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -148,8 +152,8 @@ func BenchmarkOr(b *testing.B) {
 func BenchmarkOrGeneric(b *testing.B) {
 	b.StopTimer()
 	size := 32000
-	a := make([]byte, size)
-	bb := make([]byte, size)
+	a := createRandomBuffer(size)
+	bb := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -160,8 +164,8 @@ func BenchmarkOrGeneric(b *testing.B) {
 func BenchmarkOrNaive(b *testing.B) {
 	b.StopTimer()
 	size := 32000
-	a := make([]byte, size)
-	bb := make([]byte, size)
+	a := createRandomBuffer(size)
+	bb := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -172,8 +176,8 @@ func BenchmarkOrNaive(b *testing.B) {
 func BenchmarkXor(b *testing.B) {
 	b.StopTimer()
 	size := 32000
-	a := make([]byte, size)
-	bb := make([]byte, size)
+	a := createRandomBuffer(size)
+	bb := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -184,8 +188,8 @@ func BenchmarkXor(b *testing.B) {
 func BenchmarkXorGeneric(b *testing.B) {
 	b.StopTimer()
 	size := 32000
-	a := make([]byte, size)
-	bb := make([]byte, size)
+	a := createRandomBuffer(size)
+	bb := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -196,8 +200,8 @@ func BenchmarkXorGeneric(b *testing.B) {
 func BenchmarkXorNaive(b *testing.B) {
 	b.StopTimer()
 	size := 32000
-	a := make([]byte, size)
-	bb := make([]byte, size)
+	a := createRandomBuffer(size)
+	bb := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -208,8 +212,8 @@ func BenchmarkXorNaive(b *testing.B) {
 func BenchmarkAndNot(b *testing.B) {
 	b.StopTimer()
 	size := 32000
-	a := make([]byte, size)
-	bb := make([]byte, size)
+	a := createRandomBuffer(size)
+	bb := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -220,8 +224,8 @@ func BenchmarkAndNot(b *testing.B) {
 func BenchmarkAndNotGeneric(b *testing.B) {
 	b.StopTimer()
 	size := 32000
-	a := make([]byte, size)
-	bb := make([]byte, size)
+	a := createRandomBuffer(size)
+	bb := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -232,8 +236,8 @@ func BenchmarkAndNotGeneric(b *testing.B) {
 func BenchmarkAndNotNaive(b *testing.B) {
 	b.StopTimer()
 	size := 32000
-	a := make([]byte, size)
-	bb := make([]byte, size)
+	a := createRandomBuffer(size)
+	bb := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {

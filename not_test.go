@@ -12,7 +12,7 @@ func notNaive(dst, a []byte) {
 }
 
 func testNot(t *testing.T, size int) {
-	a := make([]byte, size)
+	a := createRandomBuffer(size)
 	got := make([]byte, size)
 	Not(got, a)
 	for i, v := range got {
@@ -35,7 +35,7 @@ func TestNot(t *testing.T) {
 func BenchmarkNot(b *testing.B) {
 	b.StopTimer()
 	size := 1000000
-	a := make([]byte, size)
+	a := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -46,7 +46,7 @@ func BenchmarkNot(b *testing.B) {
 func BenchmarkNotGeneric(b *testing.B) {
 	b.StopTimer()
 	size := 1000000
-	a := make([]byte, size)
+	a := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -57,7 +57,7 @@ func BenchmarkNotGeneric(b *testing.B) {
 func BenchmarkNotNaive(b *testing.B) {
 	b.StopTimer()
 	size := 1000000
-	a := make([]byte, size)
+	a := createRandomBuffer(size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {

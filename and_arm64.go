@@ -78,3 +78,8 @@ func memset(dst []byte, b byte) {
 	l <<= 8
 	memsetGeneric(dst[l:], b)
 }
+
+func anySetMasked(a, b []byte) bool {
+	// TODO: Write NEON implementation
+	return anySetMaskedGeneric(a, b)
+}

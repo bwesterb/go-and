@@ -32,6 +32,15 @@ func andNotNaive(dst, a, b []byte) {
 	}
 }
 
+func anySetMaskedNaive(a, b []byte) bool {
+	for i := range a {
+		if a[i]&b[i] != 0 {
+			return true
+		}
+	}
+	return false
+}
+
 func createRandomBuffer(size int) []byte {
 	ret := make([]byte, size)
 	rng := rand.New(rand.NewPCG(rand.Uint64(), 0))
@@ -51,6 +60,17 @@ func testAgainst(t *testing.T, fancy, generic func(dst, a, b []byte), size int) 
 	if !bytes.Equal(c1, c2) {
 		t.Fatalf("%s produced a different result from %s at length %d:\n%x\n%x", runtime.FuncForPC(reflect.ValueOf(fancy).Pointer()).Name(), runtime.FuncForPC(reflect.ValueOf(generic).Pointer()).Name(), size, c1, c2)
 	}
+}
+
+func testAgainstBool(t *testing.T, fancy, generic func(a, b []byte) bool, size int) {
+	a := createRandomBuffer(size)
+	b := createRandomBuffer(size)
+	r1 := fancy(a, b)
+	r2 := generic(a, b)
+	if r1 != r2 {
+		t.Fatalf("%s produced a different result from %s at length %d:\n%t\n%t", runtime.FuncForPC(reflect.ValueOf(fancy).Pointer()).Name(), runtime.FuncForPC(reflect.ValueOf(generic).Pointer()).Name(), size, r1, r2)
+	}
+
 }
 
 func TestAnd(t *testing.T) {
@@ -97,6 +117,18 @@ func TestAndNot(t *testing.T) {
 		for j := 0; j < 10; j++ {
 			testAgainst(t, AndNot, andNotNaive, size+rand.IntN(100))
 			testAgainst(t, andNotGeneric, andNotNaive, size+rand.IntN(100))
+		}
+	}
+}
+
+func TestAnySetMasked(t *testing.T) {
+	for i := 0; i < 20; i++ {
+		size := 1 << i
+		testAgainstBool(t, AnySetMasked, anySetMaskedNaive, size)
+		testAgainstBool(t, anySetMaskedGeneric, anySetMaskedNaive, size)
+		for j := 0; j < 10; j++ {
+			testAgainstBool(t, AnySetMasked, anySetMaskedNaive, size+rand.IntN(100))
+			testAgainstBool(t, anySetMaskedGeneric, anySetMaskedNaive, size+rand.IntN(100))
 		}
 	}
 }
@@ -242,5 +274,41 @@ func BenchmarkAndNotNaive(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		andNotNaive(a, a, bb)
+	}
+}
+
+func BenchmarkAnySetMasked(b *testing.B) {
+	b.StopTimer()
+	size := 32000
+	a := createRandomBuffer(size)
+	bb := createRandomBuffer(size)
+	b.SetBytes(int64(size))
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		AnySetMasked(a, bb)
+	}
+}
+
+func BenchmarkAnySetMaskedGeneric(b *testing.B) {
+	b.StopTimer()
+	size := 32000
+	a := createRandomBuffer(size)
+	bb := createRandomBuffer(size)
+	b.SetBytes(int64(size))
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		anySetMaskedGeneric(a, bb)
+	}
+}
+
+func BenchmarkAnySetMaskedNaive(b *testing.B) {
+	b.StopTimer()
+	size := 32000
+	a := createRandomBuffer(size)
+	bb := createRandomBuffer(size)
+	b.SetBytes(int64(size))
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		anySetMaskedNaive(a, bb)
 	}
 }

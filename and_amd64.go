@@ -123,3 +123,21 @@ func memset(dst []byte, b byte) {
 	}
 	memsetGeneric(dst[l:], b)
 }
+
+func anySetMasked(a, b []byte) bool {
+	l := uint64(0)
+	if hasAVX2() {
+		l = uint64(len(a)) >> 8
+		if l != 0 && anySetMaskedAVX2(&a[0], &b[0], l) {
+			return true
+		}
+		l <<= 8
+	} else if hasAVX() {
+		l = uint64(len(a)) >> 7
+		if l != 0 && anySetMaskedAVX(&a[0], &b[0], l) {
+			return true
+		}
+		l <<= 7
+	}
+	return anySetMaskedGeneric(a[l:], b[l:])
+}

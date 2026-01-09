@@ -29,3 +29,7 @@ func popcnt(a []byte) int {
 func memset(dst []byte, b byte) {
 	memsetGeneric(dst, b)
 }
+
+func anySetMasked(a, b []byte) bool {
+	return anySetMaskedGeneric(a, b)
+}

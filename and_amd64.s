@@ -555,3 +555,109 @@ DATA zeroes<>+4(SB)/4, $0x00000000
 DATA zeroes<>+8(SB)/4, $0x00000000
 DATA zeroes<>+12(SB)/4, $0x00000000
 GLOBL zeroes<>(SB), RODATA|NOPTR, $16
+
+// func anySetMaskedAVX2(a *byte, b *byte, l uint64) bool
+// Requires: AVX
+TEXT ·anySetMaskedAVX2(SB), NOSPLIT, $0-25
+	MOVQ a+0(FP), AX
+	MOVQ b+8(FP), CX
+	MOVQ l+16(FP), DX
+
+loop:
+	VMOVDQU (AX), Y0
+	VMOVDQU (CX), Y1
+	VMOVDQU 32(AX), Y2
+	VMOVDQU 32(CX), Y3
+	VMOVDQU 64(AX), Y4
+	VMOVDQU 64(CX), Y5
+	VMOVDQU 96(AX), Y6
+	VMOVDQU 96(CX), Y7
+	VMOVDQU 128(AX), Y8
+	VMOVDQU 128(CX), Y9
+	VMOVDQU 160(AX), Y10
+	VMOVDQU 160(CX), Y11
+	VMOVDQU 192(AX), Y12
+	VMOVDQU 192(CX), Y13
+	VMOVDQU 224(AX), Y14
+	VMOVDQU 224(CX), Y15
+	VPTEST  Y0, Y1
+	JNZ     found
+	VPTEST  Y2, Y3
+	JNZ     found
+	VPTEST  Y4, Y5
+	JNZ     found
+	VPTEST  Y6, Y7
+	JNZ     found
+	VPTEST  Y8, Y9
+	JNZ     found
+	VPTEST  Y10, Y11
+	JNZ     found
+	VPTEST  Y12, Y13
+	JNZ     found
+	VPTEST  Y14, Y15
+	JNZ     found
+	ADDQ    $0x00000100, AX
+	ADDQ    $0x00000100, CX
+	SUBQ    $0x00000001, DX
+	JNZ     loop
+	MOVL    $0x00000000, AX
+	VZEROALL
+	RET
+
+found:
+	MOVL $0x00000001, AX
+	VZEROALL
+	RET
+
+// func anySetMaskedAVX(a *byte, b *byte, l uint64) bool
+// Requires: AVX
+TEXT ·anySetMaskedAVX(SB), NOSPLIT, $0-25
+	MOVQ a+0(FP), AX
+	MOVQ b+8(FP), CX
+	MOVQ l+16(FP), DX
+
+loop:
+	VMOVDQU (AX), X0
+	VMOVDQU (CX), X1
+	VMOVDQU 16(AX), X2
+	VMOVDQU 16(CX), X3
+	VMOVDQU 32(AX), X4
+	VMOVDQU 32(CX), X5
+	VMOVDQU 48(AX), X6
+	VMOVDQU 48(CX), X7
+	VMOVDQU 64(AX), X8
+	VMOVDQU 64(CX), X9
+	VMOVDQU 80(AX), X10
+	VMOVDQU 80(CX), X11
+	VMOVDQU 96(AX), X12
+	VMOVDQU 96(CX), X13
+	VMOVDQU 112(AX), X14
+	VMOVDQU 112(CX), X15
+	VPTEST  X0, X1
+	JNZ     found
+	VPTEST  X2, X3
+	JNZ     found
+	VPTEST  X4, X5
+	JNZ     found
+	VPTEST  X6, X7
+	JNZ     found
+	VPTEST  X8, X9
+	JNZ     found
+	VPTEST  X10, X11
+	JNZ     found
+	VPTEST  X12, X13
+	JNZ     found
+	VPTEST  X14, X15
+	JNZ     found
+	ADDQ    $0x00000080, AX
+	ADDQ    $0x00000080, CX
+	SUBQ    $0x00000001, DX
+	JNZ     loop
+	MOVL    $0x00000000, AX
+	VZEROALL
+	RET
+
+found:
+	MOVL $0x00000001, AX
+	VZEROALL
+	RET

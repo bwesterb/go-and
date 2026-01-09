@@ -6,6 +6,7 @@ import (
 
 	. "github.com/mmcloughlin/avo/build"
 	. "github.com/mmcloughlin/avo/operand"
+	. "github.com/mmcloughlin/avo/reg"
 )
 
 func main() {
@@ -24,6 +25,8 @@ func main() {
 	genPopcnt()
 	genMemset(AVX2)
 	genMemset(AVX)
+	genAnySetMasked(AVX2)
+	genAnySetMasked(AVX)
 	Generate()
 }
 
@@ -219,6 +222,50 @@ func genMemset(avxLevel AVXLevel) {
 	SUBQ(U32(1), l)
 	JNZ(LabelRef("loop"))
 
+	VZEROALL()
+	RET()
+}
+
+func genAnySetMasked(avxLevel AVXLevel) {
+	TEXT("anySetMasked"+string(avxLevel), NOSPLIT, "func(a, b *byte, l uint64) bool")
+
+	Pragma("noescape")
+
+	const rounds = 8
+
+	Doc(fmt.Sprintf("Returns whether any of the bits of the bitwise and of a and b are set assuming all are %d*l bytes", avxLevel.Bits()))
+	a := Load(Param("a"), GP64())
+	b := Load(Param("b"), GP64())
+	l := Load(Param("l"), GP64())
+
+	var as, bs []Op
+	for range rounds {
+		as = append(as, avxLevel.CreateRegister())
+		bs = append(bs, avxLevel.CreateRegister())
+	}
+
+	Label("loop")
+
+	for i := range as {
+		VMOVDQU(Mem{Base: a, Disp: avxLevel.Bytes() * i}, as[i])
+		VMOVDQU(Mem{Base: b, Disp: avxLevel.Bytes() * i}, bs[i])
+	}
+	for i := range as {
+		VPTEST(as[i], bs[i])
+		JNZ(LabelRef("found"))
+	}
+
+	ADDQ(U32(avxLevel.Bytes()*rounds), a)
+	ADDQ(U32(avxLevel.Bytes()*rounds), b)
+	SUBQ(U32(1), l)
+	JNZ(LabelRef("loop"))
+
+	MOVL(U32(0), EAX)
+	VZEROALL()
+	RET()
+
+	Label("found")
+	MOVL(U32(1), EAX)
 	VZEROALL()
 	RET()
 }

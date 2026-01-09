@@ -280,8 +280,8 @@ func BenchmarkAndNotNaive(b *testing.B) {
 func BenchmarkAnySetMasked(b *testing.B) {
 	b.StopTimer()
 	size := 32000
-	a := createRandomBuffer(size)
-	bb := createRandomBuffer(size)
+	a := make([]byte, size)
+	bb := make([]byte, size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -292,8 +292,8 @@ func BenchmarkAnySetMasked(b *testing.B) {
 func BenchmarkAnySetMaskedGeneric(b *testing.B) {
 	b.StopTimer()
 	size := 32000
-	a := createRandomBuffer(size)
-	bb := createRandomBuffer(size)
+	a := make([]byte, size)
+	bb := make([]byte, size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -304,8 +304,8 @@ func BenchmarkAnySetMaskedGeneric(b *testing.B) {
 func BenchmarkAnySetMaskedNaive(b *testing.B) {
 	b.StopTimer()
 	size := 32000
-	a := createRandomBuffer(size)
-	bb := createRandomBuffer(size)
+	a := make([]byte, size)
+	bb := make([]byte, size)
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {

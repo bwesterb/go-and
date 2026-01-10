@@ -600,11 +600,13 @@ loop:
 	ADDQ    $0x00000100, CX
 	SUBQ    $0x00000001, DX
 	JNZ     loop
-	MOVL    $0x00000000, AX
+	XORB    AL, AL
+	MOVB    AL, ret+24(FP)
 	VZEROALL
 	RET
 
 found:
-	MOVL $0x00000001, AX
+	MOVB $0x01, AL
+	MOVB AL, ret+24(FP)
 	VZEROALL
 	RET

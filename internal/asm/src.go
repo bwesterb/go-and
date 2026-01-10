@@ -6,7 +6,6 @@ import (
 
 	. "github.com/mmcloughlin/avo/build"
 	. "github.com/mmcloughlin/avo/operand"
-	. "github.com/mmcloughlin/avo/reg"
 )
 
 func main() {
@@ -261,12 +260,16 @@ func genAnyMaskedAVX() {
 	SUBQ(U32(1), l)
 	JNZ(LabelRef("loop"))
 
-	MOVL(U32(0), EAX)
+	ret := GP8()
+
+	XORB(ret, ret) // return false
+	Store(ret, ReturnIndex(0))
 	VZEROALL()
 	RET()
 
 	Label("found")
-	MOVL(U32(1), EAX)
+	MOVB(U8(1), ret) // return true
+	Store(ret, ReturnIndex(0))
 	VZEROALL()
 	RET()
 }

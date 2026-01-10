@@ -187,7 +187,14 @@ func AnyMasked(a, b []byte) bool {
 }
 
 func anyMaskedGeneric(a, b []byte) bool {
-	for i := range a {
+	i := 0
+
+	for ; i <= len(a)-8; i += 8 {
+		if binary.LittleEndian.Uint64(a[i:])&binary.LittleEndian.Uint64(b[i:]) != 0 {
+			return true
+		}
+	}
+	for ; i < len(a); i++ {
 		if a[i]&b[i] != 0 {
 			return true
 		}

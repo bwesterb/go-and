@@ -556,9 +556,9 @@ DATA zeroes<>+8(SB)/4, $0x00000000
 DATA zeroes<>+12(SB)/4, $0x00000000
 GLOBL zeroes<>(SB), RODATA|NOPTR, $16
 
-// func anyMaskedAVX2(a *byte, b *byte, l uint64) bool
+// func anyMaskedAVX(a *byte, b *byte, l uint64) bool
 // Requires: AVX
-TEXT ·anyMaskedAVX2(SB), NOSPLIT, $0-25
+TEXT ·anyMaskedAVX(SB), NOSPLIT, $0-25
 	MOVQ a+0(FP), AX
 	MOVQ b+8(FP), CX
 	MOVQ l+16(FP), DX
@@ -598,59 +598,6 @@ loop:
 	JNZ     found
 	ADDQ    $0x00000100, AX
 	ADDQ    $0x00000100, CX
-	SUBQ    $0x00000001, DX
-	JNZ     loop
-	MOVL    $0x00000000, AX
-	VZEROALL
-	RET
-
-found:
-	MOVL $0x00000001, AX
-	VZEROALL
-	RET
-
-// func anyMaskedAVX(a *byte, b *byte, l uint64) bool
-// Requires: AVX
-TEXT ·anyMaskedAVX(SB), NOSPLIT, $0-25
-	MOVQ a+0(FP), AX
-	MOVQ b+8(FP), CX
-	MOVQ l+16(FP), DX
-
-loop:
-	VMOVDQU (AX), X0
-	VMOVDQU (CX), X1
-	VMOVDQU 16(AX), X2
-	VMOVDQU 16(CX), X3
-	VMOVDQU 32(AX), X4
-	VMOVDQU 32(CX), X5
-	VMOVDQU 48(AX), X6
-	VMOVDQU 48(CX), X7
-	VMOVDQU 64(AX), X8
-	VMOVDQU 64(CX), X9
-	VMOVDQU 80(AX), X10
-	VMOVDQU 80(CX), X11
-	VMOVDQU 96(AX), X12
-	VMOVDQU 96(CX), X13
-	VMOVDQU 112(AX), X14
-	VMOVDQU 112(CX), X15
-	VPTEST  X0, X1
-	JNZ     found
-	VPTEST  X2, X3
-	JNZ     found
-	VPTEST  X4, X5
-	JNZ     found
-	VPTEST  X6, X7
-	JNZ     found
-	VPTEST  X8, X9
-	JNZ     found
-	VPTEST  X10, X11
-	JNZ     found
-	VPTEST  X12, X13
-	JNZ     found
-	VPTEST  X14, X15
-	JNZ     found
-	ADDQ    $0x00000080, AX
-	ADDQ    $0x00000080, CX
 	SUBQ    $0x00000001, DX
 	JNZ     loop
 	MOVL    $0x00000000, AX

@@ -20,8 +20,8 @@ func testAgainstBool(t *testing.T, fancy, generic func(a, b []byte) bool, size i
 	a := make([]byte, size)
 	b := make([]byte, size)
 	idx := rand.IntN(size)
-	a[idx] = uint8(rand.Uint())
-	b[idx] = uint8(rand.Uint())
+	a[idx] = uint8(rand.Int())
+	b[idx] = uint8(rand.Int())
 	r1 := fancy(a, b)
 	r2 := generic(a, b)
 	if r1 != r2 {

@@ -63,14 +63,16 @@ func testAgainst(t *testing.T, fancy, generic func(dst, a, b []byte), size int) 
 }
 
 func testAgainstBool(t *testing.T, fancy, generic func(a, b []byte) bool, size int) {
-	a := createRandomBuffer(size)
-	b := createRandomBuffer(size)
+	a := make([]byte, size)
+	b := make([]byte, size)
+	idx := rand.IntN(size)
+	a[idx] = uint8(rand.Uint())
+	b[idx] = uint8(rand.Uint())
 	r1 := fancy(a, b)
 	r2 := generic(a, b)
 	if r1 != r2 {
 		t.Fatalf("%s produced a different result from %s at length %d:\n%t\n%t", runtime.FuncForPC(reflect.ValueOf(fancy).Pointer()).Name(), runtime.FuncForPC(reflect.ValueOf(generic).Pointer()).Name(), size, r1, r2)
 	}
-
 }
 
 func TestAnd(t *testing.T) {

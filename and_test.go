@@ -32,15 +32,6 @@ func andNotNaive(dst, a, b []byte) {
 	}
 }
 
-func anyMaskedNaive(a, b []byte) bool {
-	for i := range a {
-		if a[i]&b[i] != 0 {
-			return true
-		}
-	}
-	return false
-}
-
 func createRandomBuffer(size int) []byte {
 	ret := make([]byte, size)
 	rng := rand.New(rand.NewPCG(rand.Uint64(), 0))
@@ -59,19 +50,6 @@ func testAgainst(t *testing.T, fancy, generic func(dst, a, b []byte), size int) 
 	generic(c2, a, b)
 	if !bytes.Equal(c1, c2) {
 		t.Fatalf("%s produced a different result from %s at length %d:\n%x\n%x", runtime.FuncForPC(reflect.ValueOf(fancy).Pointer()).Name(), runtime.FuncForPC(reflect.ValueOf(generic).Pointer()).Name(), size, c1, c2)
-	}
-}
-
-func testAgainstBool(t *testing.T, fancy, generic func(a, b []byte) bool, size int) {
-	a := make([]byte, size)
-	b := make([]byte, size)
-	idx := rand.IntN(size)
-	a[idx] = uint8(rand.Uint())
-	b[idx] = uint8(rand.Uint())
-	r1 := fancy(a, b)
-	r2 := generic(a, b)
-	if r1 != r2 {
-		t.Fatalf("%s produced a different result from %s at length %d:\n%t\n%t", runtime.FuncForPC(reflect.ValueOf(fancy).Pointer()).Name(), runtime.FuncForPC(reflect.ValueOf(generic).Pointer()).Name(), size, r1, r2)
 	}
 }
 
@@ -119,18 +97,6 @@ func TestAndNot(t *testing.T) {
 		for j := 0; j < 10; j++ {
 			testAgainst(t, AndNot, andNotNaive, size+rand.IntN(100))
 			testAgainst(t, andNotGeneric, andNotNaive, size+rand.IntN(100))
-		}
-	}
-}
-
-func TestAnyMasked(t *testing.T) {
-	for i := 0; i < 20; i++ {
-		size := 1 << i
-		testAgainstBool(t, AnyMasked, anyMaskedNaive, size)
-		testAgainstBool(t, anyMaskedGeneric, anyMaskedNaive, size)
-		for j := 0; j < 10; j++ {
-			testAgainstBool(t, AnyMasked, anyMaskedNaive, size+rand.IntN(100))
-			testAgainstBool(t, anyMaskedGeneric, anyMaskedNaive, size+rand.IntN(100))
 		}
 	}
 }
@@ -276,41 +242,5 @@ func BenchmarkAndNotNaive(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		andNotNaive(a, a, bb)
-	}
-}
-
-func BenchmarkAnyMasked(b *testing.B) {
-	b.StopTimer()
-	size := 32000
-	a := make([]byte, size)
-	bb := make([]byte, size)
-	b.SetBytes(int64(size))
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		AnyMasked(a, bb)
-	}
-}
-
-func BenchmarkAnyMaskedGeneric(b *testing.B) {
-	b.StopTimer()
-	size := 32000
-	a := make([]byte, size)
-	bb := make([]byte, size)
-	b.SetBytes(int64(size))
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		anyMaskedGeneric(a, bb)
-	}
-}
-
-func BenchmarkAnyMaskedNaive(b *testing.B) {
-	b.StopTimer()
-	size := 32000
-	a := make([]byte, size)
-	bb := make([]byte, size)
-	b.SetBytes(int64(size))
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		anyMaskedNaive(a, bb)
 	}
 }

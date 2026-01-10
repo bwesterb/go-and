@@ -25,8 +25,8 @@ func main() {
 	genPopcnt()
 	genMemset(AVX2)
 	genMemset(AVX)
-	genAnySetMasked(AVX2)
-	genAnySetMasked(AVX)
+	genAnyMasked(AVX2) // TODO: 256 bit is already supported on AVX
+	genAnyMasked(AVX)
 	Generate()
 }
 
@@ -226,8 +226,8 @@ func genMemset(avxLevel AVXLevel) {
 	RET()
 }
 
-func genAnySetMasked(avxLevel AVXLevel) {
-	TEXT("anySetMasked"+string(avxLevel), NOSPLIT, "func(a, b *byte, l uint64) bool")
+func genAnyMasked(avxLevel AVXLevel) {
+	TEXT("anyMasked"+string(avxLevel), NOSPLIT, "func(a, b *byte, l uint64) bool")
 
 	Pragma("noescape")
 

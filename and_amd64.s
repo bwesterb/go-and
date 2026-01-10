@@ -556,9 +556,9 @@ DATA zeroes<>+8(SB)/4, $0x00000000
 DATA zeroes<>+12(SB)/4, $0x00000000
 GLOBL zeroes<>(SB), RODATA|NOPTR, $16
 
-// func anySetMaskedAVX2(a *byte, b *byte, l uint64) bool
+// func anyMaskedAVX2(a *byte, b *byte, l uint64) bool
 // Requires: AVX
-TEXT ·anySetMaskedAVX2(SB), NOSPLIT, $0-25
+TEXT ·anyMaskedAVX2(SB), NOSPLIT, $0-25
 	MOVQ a+0(FP), AX
 	MOVQ b+8(FP), CX
 	MOVQ l+16(FP), DX
@@ -609,9 +609,9 @@ found:
 	VZEROALL
 	RET
 
-// func anySetMaskedAVX(a *byte, b *byte, l uint64) bool
+// func anyMaskedAVX(a *byte, b *byte, l uint64) bool
 // Requires: AVX
-TEXT ·anySetMaskedAVX(SB), NOSPLIT, $0-25
+TEXT ·anyMaskedAVX(SB), NOSPLIT, $0-25
 	MOVQ a+0(FP), AX
 	MOVQ b+8(FP), CX
 	MOVQ l+16(FP), DX

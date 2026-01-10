@@ -2,7 +2,7 @@
 
 set -ex
 
-FUNCTIONS="(And|Or|Xor|AndNot|AnySetMasked)"
+FUNCTIONS="(And|Or|Xor|AndNot|AnyMasked)"
 
 go test -run=^# -count=10 -bench="^Benchmark${FUNCTIONS}$" | tee asm
 go test -run=^# -count=10 -bench="^Benchmark${FUNCTIONS}$" -tags purego | tee purego

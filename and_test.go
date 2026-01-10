@@ -32,7 +32,7 @@ func andNotNaive(dst, a, b []byte) {
 	}
 }
 
-func anySetMaskedNaive(a, b []byte) bool {
+func anyMaskedNaive(a, b []byte) bool {
 	for i := range a {
 		if a[i]&b[i] != 0 {
 			return true
@@ -121,14 +121,14 @@ func TestAndNot(t *testing.T) {
 	}
 }
 
-func TestAnySetMasked(t *testing.T) {
+func TestAnyMasked(t *testing.T) {
 	for i := 0; i < 20; i++ {
 		size := 1 << i
-		testAgainstBool(t, AnySetMasked, anySetMaskedNaive, size)
-		testAgainstBool(t, anySetMaskedGeneric, anySetMaskedNaive, size)
+		testAgainstBool(t, AnyMasked, anyMaskedNaive, size)
+		testAgainstBool(t, anyMaskedGeneric, anyMaskedNaive, size)
 		for j := 0; j < 10; j++ {
-			testAgainstBool(t, AnySetMasked, anySetMaskedNaive, size+rand.IntN(100))
-			testAgainstBool(t, anySetMaskedGeneric, anySetMaskedNaive, size+rand.IntN(100))
+			testAgainstBool(t, AnyMasked, anyMaskedNaive, size+rand.IntN(100))
+			testAgainstBool(t, anyMaskedGeneric, anyMaskedNaive, size+rand.IntN(100))
 		}
 	}
 }
@@ -277,7 +277,7 @@ func BenchmarkAndNotNaive(b *testing.B) {
 	}
 }
 
-func BenchmarkAnySetMasked(b *testing.B) {
+func BenchmarkAnyMasked(b *testing.B) {
 	b.StopTimer()
 	size := 32000
 	a := make([]byte, size)
@@ -285,11 +285,11 @@ func BenchmarkAnySetMasked(b *testing.B) {
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		AnySetMasked(a, bb)
+		AnyMasked(a, bb)
 	}
 }
 
-func BenchmarkAnySetMaskedGeneric(b *testing.B) {
+func BenchmarkAnyMaskedGeneric(b *testing.B) {
 	b.StopTimer()
 	size := 32000
 	a := make([]byte, size)
@@ -297,11 +297,11 @@ func BenchmarkAnySetMaskedGeneric(b *testing.B) {
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		anySetMaskedGeneric(a, bb)
+		anyMaskedGeneric(a, bb)
 	}
 }
 
-func BenchmarkAnySetMaskedNaive(b *testing.B) {
+func BenchmarkAnyMaskedNaive(b *testing.B) {
 	b.StopTimer()
 	size := 32000
 	a := make([]byte, size)
@@ -309,6 +309,6 @@ func BenchmarkAnySetMaskedNaive(b *testing.B) {
 	b.SetBytes(int64(size))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		anySetMaskedNaive(a, bb)
+		anyMaskedNaive(a, bb)
 	}
 }

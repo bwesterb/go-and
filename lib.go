@@ -177,16 +177,16 @@ func memsetGeneric(dst []byte, b byte) {
 	}
 }
 
-// AnySetMasked returns whether at least one of the bits of its arguments AND-ed together is set.
-func AnySetMasked(a, b []byte) bool {
+// AnyMasked returns whether at least one of the bits of its arguments AND-ed together is set.
+func AnyMasked(a, b []byte) bool {
 	if len(a) != len(b) {
 		panic("lengths of a and b must be equal")
 	}
 
-	return anySetMasked(a, b)
+	return anyMasked(a, b)
 }
 
-func anySetMaskedGeneric(a, b []byte) bool {
+func anyMaskedGeneric(a, b []byte) bool {
 	for i := range a {
 		if a[i]&b[i] != 0 {
 			return true

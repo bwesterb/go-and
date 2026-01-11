@@ -30,6 +30,10 @@ func memset(dst []byte, b byte) {
 	memsetGeneric(dst, b)
 }
 
+func any_(a []byte) bool {
+	return anyGeneric(a)
+}
+
 func anyMasked(a, b []byte) bool {
 	return anyMaskedGeneric(a, b)
 }

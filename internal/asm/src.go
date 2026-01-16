@@ -24,6 +24,7 @@ func main() {
 	genPopcnt()
 	genMemset(AVX2)
 	genMemset(AVX)
+	genAnyMaskedAVX()
 	Generate()
 }
 
@@ -219,6 +220,56 @@ func genMemset(avxLevel AVXLevel) {
 	SUBQ(U32(1), l)
 	JNZ(LabelRef("loop"))
 
+	VZEROALL()
+	RET()
+}
+
+func genAnyMaskedAVX() {
+	TEXT("anyMaskedAVX", NOSPLIT, "func(a, b *byte, l uint64) bool")
+
+	Pragma("noescape")
+
+	const bits = 256 // Even though this only needs AVX and not AVX2
+	const bytes = bits / 8
+	const rounds = 8
+
+	Doc(fmt.Sprintf("Returns whether any of the bits of the bitwise and of a and b are set assuming all are %d*l bytes", bits))
+	a := Load(Param("a"), GP64())
+	b := Load(Param("b"), GP64())
+	l := Load(Param("l"), GP64())
+
+	var as, bs []Op
+	for range rounds {
+		as = append(as, YMM())
+		bs = append(bs, YMM())
+	}
+
+	Label("loop")
+
+	for i := range as {
+		VMOVDQU(Mem{Base: a, Disp: bytes * i}, as[i])
+		VMOVDQU(Mem{Base: b, Disp: bytes * i}, bs[i])
+	}
+	for i := range as {
+		VPTEST(as[i], bs[i])
+		JNZ(LabelRef("found"))
+	}
+
+	ADDQ(U32(bytes*rounds), a)
+	ADDQ(U32(bytes*rounds), b)
+	SUBQ(U32(1), l)
+	JNZ(LabelRef("loop"))
+
+	ret := GP8()
+
+	XORB(ret, ret) // return false
+	Store(ret, ReturnIndex(0))
+	VZEROALL()
+	RET()
+
+	Label("found")
+	MOVB(U8(1), ret) // return true
+	Store(ret, ReturnIndex(0))
 	VZEROALL()
 	RET()
 }

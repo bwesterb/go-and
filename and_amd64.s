@@ -555,3 +555,58 @@ DATA zeroes<>+4(SB)/4, $0x00000000
 DATA zeroes<>+8(SB)/4, $0x00000000
 DATA zeroes<>+12(SB)/4, $0x00000000
 GLOBL zeroes<>(SB), RODATA|NOPTR, $16
+
+// func anyMaskedAVX(a *byte, b *byte, l uint64) bool
+// Requires: AVX
+TEXT ·anyMaskedAVX(SB), NOSPLIT, $0-25
+	MOVQ a+0(FP), AX
+	MOVQ b+8(FP), CX
+	MOVQ l+16(FP), DX
+
+loop:
+	VMOVDQU (AX), Y0
+	VMOVDQU (CX), Y1
+	VMOVDQU 32(AX), Y2
+	VMOVDQU 32(CX), Y3
+	VMOVDQU 64(AX), Y4
+	VMOVDQU 64(CX), Y5
+	VMOVDQU 96(AX), Y6
+	VMOVDQU 96(CX), Y7
+	VMOVDQU 128(AX), Y8
+	VMOVDQU 128(CX), Y9
+	VMOVDQU 160(AX), Y10
+	VMOVDQU 160(CX), Y11
+	VMOVDQU 192(AX), Y12
+	VMOVDQU 192(CX), Y13
+	VMOVDQU 224(AX), Y14
+	VMOVDQU 224(CX), Y15
+	VPTEST  Y0, Y1
+	JNZ     found
+	VPTEST  Y2, Y3
+	JNZ     found
+	VPTEST  Y4, Y5
+	JNZ     found
+	VPTEST  Y6, Y7
+	JNZ     found
+	VPTEST  Y8, Y9
+	JNZ     found
+	VPTEST  Y10, Y11
+	JNZ     found
+	VPTEST  Y12, Y13
+	JNZ     found
+	VPTEST  Y14, Y15
+	JNZ     found
+	ADDQ    $0x00000100, AX
+	ADDQ    $0x00000100, CX
+	SUBQ    $0x00000001, DX
+	JNZ     loop
+	XORB    AL, AL
+	MOVB    AL, ret+24(FP)
+	VZEROALL
+	RET
+
+found:
+	MOVB $0x01, AL
+	MOVB AL, ret+24(FP)
+	VZEROALL
+	RET

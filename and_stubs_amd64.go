@@ -68,3 +68,8 @@ func memsetAVX2(dst *byte, l uint64, b byte)
 //
 //go:noescape
 func memsetAVX(dst *byte, l uint64, b byte)
+
+// Returns whether any of the bits of the bitwise and of a and b are set assuming all are 256*l bytes
+//
+//go:noescape
+func anyMaskedAVX(a *byte, b *byte, l uint64) bool

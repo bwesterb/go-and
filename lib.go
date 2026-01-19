@@ -177,6 +177,27 @@ func memsetGeneric(dst []byte, b byte) {
 	}
 }
 
+// Any returns whether at least one bit is set.
+func Any(a []byte) bool {
+	return any_(a)
+}
+
+func anyGeneric(a []byte) bool {
+	i := 0
+
+	for ; i <= len(a)-8; i += 8 {
+		if binary.LittleEndian.Uint64(a[i:]) != 0 {
+			return true
+		}
+	}
+	for ; i < len(a); i++ {
+		if a[i] != 0 {
+			return true
+		}
+	}
+	return false
+}
+
 // AnyMasked returns whether at least one of the bits of its arguments AND-ed together is set.
 func AnyMasked(a, b []byte) bool {
 	if len(a) != len(b) {

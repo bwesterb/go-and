@@ -556,6 +556,51 @@ DATA zeroes<>+8(SB)/4, $0x00000000
 DATA zeroes<>+12(SB)/4, $0x00000000
 GLOBL zeroes<>(SB), RODATA|NOPTR, $16
 
+// func anyAVX(a *byte, l uint64) bool
+// Requires: AVX
+TEXT ·anyAVX(SB), NOSPLIT, $0-17
+	MOVQ a+0(FP), AX
+	MOVQ l+8(FP), CX
+
+loop:
+	VMOVDQU (AX), Y0
+	VMOVDQU 32(AX), Y1
+	VMOVDQU 64(AX), Y2
+	VMOVDQU 96(AX), Y3
+	VMOVDQU 128(AX), Y4
+	VMOVDQU 160(AX), Y5
+	VMOVDQU 192(AX), Y6
+	VMOVDQU 224(AX), Y7
+	VPTEST  Y0, Y0
+	JNZ     found
+	VPTEST  Y1, Y1
+	JNZ     found
+	VPTEST  Y2, Y2
+	JNZ     found
+	VPTEST  Y3, Y3
+	JNZ     found
+	VPTEST  Y4, Y4
+	JNZ     found
+	VPTEST  Y5, Y5
+	JNZ     found
+	VPTEST  Y6, Y6
+	JNZ     found
+	VPTEST  Y7, Y7
+	JNZ     found
+	ADDQ    $0x00000100, AX
+	SUBQ    $0x00000001, CX
+	JNZ     loop
+	XORB    AL, AL
+	MOVB    AL, ret+16(FP)
+	VZEROALL
+	RET
+
+found:
+	MOVB $0x01, AL
+	MOVB AL, ret+16(FP)
+	VZEROALL
+	RET
+
 // func anyMaskedAVX(a *byte, b *byte, l uint64) bool
 // Requires: AVX
 TEXT ·anyMaskedAVX(SB), NOSPLIT, $0-25

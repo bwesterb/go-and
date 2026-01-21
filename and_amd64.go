@@ -106,6 +106,20 @@ func popcnt(a []byte) int {
 	return ret
 }
 
+func popcntMasked(a, b []byte) int {
+	l := uint64(0)
+	var ret int
+	if hasPopcnt() && hasAVX() {
+		l = uint64(len(a)) >> 5
+		if l != 0 {
+			ret = popcntMaskedAsmAVX(&a[0], &b[0], l)
+		}
+		l <<= 5
+	}
+	ret += popcntMaskedGeneric(a[l:], b[l:])
+	return ret
+}
+
 func memset(dst []byte, b byte) {
 	l := uint64(0)
 	if hasAVX2() {

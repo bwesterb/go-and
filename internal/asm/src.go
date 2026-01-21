@@ -22,6 +22,7 @@ func main() {
 	genNot(AVX2)
 	genNot(AVX)
 	genPopcnt()
+	genPopcntMasked(AVX)
 	genMemset(AVX2)
 	genMemset(AVX)
 	genAnyAVX()
@@ -178,6 +179,66 @@ func genPopcnt() {
 	SUBQ(U32(1), l)
 	JNZ(LabelRef("loop"))
 
+	Store(ret, ReturnIndex(0))
+	RET()
+}
+
+func genPopcntMasked(avxLevel AVXLevel) {
+	TEXT("popcntMaskedAsm"+string(avxLevel), NOSPLIT, "func(a, b *byte, l uint64) int")
+
+	Pragma("noescape")
+
+	const rounds = 2
+	gpsPerWide := avxLevel.Bits() / 64
+
+	Doc(fmt.Sprintf("Counts the number of bits set in a&b assuming both are %d*l bytes", rounds*avxLevel.Bytes()))
+	a := Load(Param("a"), GP64())
+	b := Load(Param("b"), GP64())
+	l := Load(Param("l"), GP64())
+
+	ret := GP64()
+	Comment("Zero the return register")
+	XORQ(ret, ret)
+
+	var as, bs []Op
+	for i := 0; rounds > i; i++ {
+		as = append(as, avxLevel.CreateRegister())
+		bs = append(bs, avxLevel.CreateRegister())
+	}
+	var split, counts []Op
+	for i := 0; len(as)*gpsPerWide > i; i++ {
+		split = append(split, GP64())
+		counts = append(counts, GP64())
+	}
+
+	Label("loop")
+
+	for i := range len(as) {
+		VMOVDQU(Mem{Base: a, Disp: avxLevel.Bytes() * i}, as[i])
+		VMOVDQU(Mem{Base: b, Disp: avxLevel.Bytes() * i}, bs[i])
+	}
+	for i := range len(as) {
+		VPAND(bs[i], as[i], as[i])
+	}
+	Commentf("Split the wide registers into general purpose registers on which we can call POPCNT")
+	for i := range len(as) {
+		for j := range gpsPerWide {
+			VPEXTRQ(U8(j), as[i], split[i*gpsPerWide+j])
+		}
+	}
+	for i := range len(split) {
+		POPCNTQ(split[i], counts[i])
+	}
+	for i := range len(split) {
+		ADDQ(counts[i], ret)
+	}
+
+	ADDQ(U32(avxLevel.Bytes()*len(as)), a)
+	ADDQ(U32(avxLevel.Bytes()*len(as)), b)
+	SUBQ(U32(1), l)
+	JNZ(LabelRef("loop"))
+
+	VZEROALL()
 	Store(ret, ReturnIndex(0))
 	RET()
 }

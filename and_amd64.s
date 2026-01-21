@@ -520,6 +520,45 @@ loop:
 	MOVQ    DX, ret+16(FP)
 	RET
 
+// func popcntMaskedAsmAVX(a *byte, b *byte, l uint64) int
+// Requires: AVX, POPCNT
+TEXT ·popcntMaskedAsmAVX(SB), NOSPLIT, $0-32
+	MOVQ a+0(FP), AX
+	MOVQ b+8(FP), CX
+	MOVQ l+16(FP), DX
+
+	// Zero the return register
+	XORQ BX, BX
+
+loop:
+	VMOVDQU (AX), X0
+	VMOVDQU (CX), X1
+	VMOVDQU 16(AX), X2
+	VMOVDQU 16(CX), X3
+	VPAND   X1, X0, X0
+	VPAND   X3, X2, X2
+
+	// Split the wide registers into general purpose registers on which we can call POPCNT
+	VPEXTRQ $0x00, X0, SI
+	VPEXTRQ $0x01, X0, DI
+	VPEXTRQ $0x00, X2, R8
+	VPEXTRQ $0x01, X2, R9
+	POPCNTQ SI, SI
+	POPCNTQ DI, DI
+	POPCNTQ R8, R8
+	POPCNTQ R9, R9
+	ADDQ    SI, BX
+	ADDQ    DI, BX
+	ADDQ    R8, BX
+	ADDQ    R9, BX
+	ADDQ    $0x00000020, AX
+	ADDQ    $0x00000020, CX
+	SUBQ    $0x00000001, DX
+	JNZ     loop
+	VZEROALL
+	MOVQ    BX, ret+24(FP)
+	RET
+
 // func memsetAVX2(dst *byte, l uint64, b byte)
 // Requires: AVX, AVX2
 TEXT ·memsetAVX2(SB), NOSPLIT, $0-17

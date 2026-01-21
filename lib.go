@@ -133,9 +133,7 @@ func notGeneric(dst, a []byte) {
 	}
 }
 
-// Writes bitwise and of not(a) and b to dst.
-//
-// Panics if len(a) ≠ len(b), or len(dst) ≠ len(a).
+// Popcnt counts the number of bits set in a.
 func Popcnt(a []byte) int {
 	return popcnt(a)
 }

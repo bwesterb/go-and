@@ -152,6 +152,30 @@ func popcntGeneric(a []byte) int {
 	return ret
 }
 
+// PopcntMasked counts the number of bits set in a&b.
+//
+// Panics if len(a) ≠ len(b).
+func PopcntMasked(a, b []byte) int {
+	if len(a) != len(b) {
+		panic("lengths of a and b must be equal")
+	}
+	return popcntMasked(a, b)
+}
+
+func popcntMaskedGeneric(a, b []byte) int {
+	var ret int
+	i := 0
+
+	for ; i <= len(a)-8; i += 8 {
+		ret += bits.OnesCount64(binary.LittleEndian.Uint64(a[i:]) & binary.LittleEndian.Uint64(b[i:]))
+	}
+
+	for ; i < len(a); i++ {
+		ret += bits.OnesCount8(a[i] & b[i])
+	}
+	return ret
+}
+
 // Memset sets dst[*] to b.
 func Memset(dst []byte, b byte) {
 	memset(dst, b)

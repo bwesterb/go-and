@@ -485,6 +485,8 @@ loop:
 TEXT ·popcntAsm(SB), NOSPLIT, $0-24
 	MOVQ a+0(FP), AX
 	MOVQ l+8(FP), CX
+
+	// Zero the return register
 	XORQ DX, DX
 
 loop:

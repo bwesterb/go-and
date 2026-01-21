@@ -159,7 +159,7 @@ func genPopcnt() {
 	as := []Op{GP64(), GP64(), GP64(), GP64(), GP64(), GP64(), GP64(), GP64()}
 	intermediates := []Op{GP64(), GP64(), GP64(), GP64(), GP64(), GP64(), GP64(), GP64()}
 
-	Doc("Zero the return register")
+	Comment("Zero the return register")
 	XORQ(ret, ret)
 
 	Label("loop")

@@ -1,4 +1,4 @@
-//go:build amd64.v2
+//go:build amd64.v2 && !purego
 
 package and
 

@@ -40,6 +40,11 @@ jobs:
     - name: Build purego
       run: go build -v -tags purego ./...
 
+    - name: Build purego for GOAMD64=v3
+      run: go build -v -tags purego ./...
+      env:
+        GOAMD64: v3
+
     - name: Build for GOARCH=arm64
       run: go build -v ./...
       env:

@@ -59,6 +59,11 @@ func notAVX(dst *byte, a *byte, l uint64)
 //go:noescape
 func popcntAsm(a *byte, l uint64) int
 
+// Counts the number of bits set in a&b assuming both are 32*l bytes
+//
+//go:noescape
+func popcntMaskedAsmAVX(a *byte, b *byte, l uint64) int
+
 // Sets each byte in dst to b
 //
 //go:noescape

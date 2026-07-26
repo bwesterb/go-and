@@ -70,6 +70,10 @@ func popcnt(a []byte) int {
 	return ret + popcntGeneric(a[l:])
 }
 
+func popcntMasked(a, b []byte) int {
+	return popcntMaskedGeneric(a, b)
+}
+
 func memset(dst []byte, b byte) {
 	l := uint64(len(dst)) >> 8
 	if l != 0 {

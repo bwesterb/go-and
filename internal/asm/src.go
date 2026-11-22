@@ -29,6 +29,7 @@ func main() {
 	genNot(AVX)
 	genPopcntAVX512()
 	genPopcnt()
+	genPopcntMaskedAVX512()
 	genPopcntMasked(AVX)
 	genMemset(AVX512)
 	genMemset(AVX2)
@@ -281,6 +282,64 @@ func genPopcnt() {
 	SUBQ(U32(1), l)
 	JNZ(LabelRef("loop"))
 
+	Store(ret, ReturnIndex(0))
+	RET()
+}
+
+func genPopcntMaskedAVX512() {
+	TEXT("popcntMaskedAVX512", NOSPLIT, "func(a, b *byte, l uint64) int")
+
+	Pragma("noescape")
+
+	const bytes = 64
+	const rounds = 8
+	const accs = 4
+
+	Doc(fmt.Sprintf("Counts the number of bits set in a&b assuming both are %d*l bytes", bytes*rounds))
+	a := Load(Param("a"), GP64())
+	b := Load(Param("b"), GP64())
+	l := Load(Param("l"), GP64())
+
+	var as []Op
+	for range rounds {
+		as = append(as, ZMM())
+	}
+	var acc []reg.VecVirtual
+	for range accs {
+		z := ZMM()
+		VPXORQ(z, z, z)
+		acc = append(acc, z)
+	}
+
+	Label("loop")
+
+	for i, r := range as {
+		VMOVDQU64(Mem{Base: a, Disp: bytes * i}, r)
+	}
+	for i, r := range as {
+		VPANDQ(Mem{Base: b, Disp: bytes * i}, r, r)
+	}
+	Comment("Count the bits in each quadword, and accumulate into several",
+		"registers to avoid a long dependency chain")
+	for _, r := range as {
+		VPOPCNTQ(r, r)
+	}
+	for i, r := range as {
+		VPADDQ(r, acc[i%accs], acc[i%accs])
+	}
+
+	ADDQ(U32(bytes*rounds), a)
+	ADDQ(U32(bytes*rounds), b)
+	SUBQ(U32(1), l)
+	JNZ(LabelRef("loop"))
+
+	VPADDQ(acc[1], acc[0], acc[0])
+	VPADDQ(acc[3], acc[2], acc[2])
+	VPADDQ(acc[2], acc[0], acc[0])
+	ret := GP64()
+	sumQuadwords(acc[0], ret)
+
+	VZEROALL()
 	Store(ret, ReturnIndex(0))
 	RET()
 }

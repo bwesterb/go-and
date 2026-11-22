@@ -89,6 +89,11 @@ func popcntAVX512(a *byte, l uint64) int
 //go:noescape
 func popcntAsm(a *byte, l uint64) int
 
+// Counts the number of bits set in a&b assuming both are 512*l bytes
+//
+//go:noescape
+func popcntMaskedAVX512(a *byte, b *byte, l uint64) int
+
 // Counts the number of bits set in a&b assuming both are 32*l bytes
 //
 //go:noescape

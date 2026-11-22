@@ -133,12 +133,16 @@ func popcnt(a []byte) int {
 func popcntMasked(a, b []byte) int {
 	l := uint64(0)
 	var ret int
+	if len(a) >= 512 && hasAVX512VPOPCNTDQ() {
+		l = uint64(len(a)) >> 9
+		ret = popcntMaskedAVX512(&a[0], &b[0], l)
+		l <<= 9
+	}
 	if hasPopcnt() && hasAVX() {
-		l = uint64(len(a)) >> 5
-		if l != 0 {
-			ret = popcntMaskedAsmAVX(&a[0], &b[0], l)
+		if n := uint64(len(a)-int(l)) >> 5; n != 0 {
+			ret += popcntMaskedAsmAVX(&a[l], &b[l], n)
+			l += n << 5
 		}
-		l <<= 5
 	}
 	ret += popcntMaskedGeneric(a[l:], b[l:])
 	return ret

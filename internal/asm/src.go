@@ -20,6 +20,7 @@ func main() {
 	gen("xor", evex(VPXORQ), AVX512, "Sets dst to the bitwise xor of a and b")
 	gen("xor", VPXOR, AVX2, "Sets dst to the bitwise xor of a and b")
 	gen("xor", VPXOR, AVX, "Sets dst to the bitwise xor of a and b")
+	gen("andNot", evex(VPANDNQ), AVX512, "Sets dst to the bitwise and of not(a) and b")
 	gen("andNot", VPANDN, AVX2, "Sets dst to the bitwise and of not(a) and b")
 	gen("andNot", VPANDN, AVX, "Sets dst to the bitwise and of not(a) and b")
 	genNot(AVX2)

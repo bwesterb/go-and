@@ -70,12 +70,16 @@ func xor(dst, a, b []byte) {
 
 func andNot(dst, a, b []byte) {
 	l := uint64(0)
+	if len(a) >= 512 && avx512Worthwhile() {
+		l = uint64(len(a)) >> 9
+		andNotAVX512(&dst[0], &a[0], &b[0], l)
+		l <<= 9
+	}
 	if hasAVX2() {
-		l = uint64(len(a)) >> 8
-		if l != 0 {
-			andNotAVX2(&dst[0], &a[0], &b[0], l)
+		if n := uint64(len(a)-int(l)) >> 8; n != 0 {
+			andNotAVX2(&dst[l], &a[l], &b[l], n)
+			l += n << 8
 		}
-		l <<= 8
 	} else if hasAVX() {
 		l = uint64(len(a)) >> 7
 		if l != 0 {

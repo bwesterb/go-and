@@ -932,6 +932,60 @@ found:
 	VZEROALL
 	RET
 
+// func anyMaskedAVX512(a *byte, b *byte, l uint64) bool
+// Requires: AVX, AVX512F
+TEXT ·anyMaskedAVX512(SB), NOSPLIT, $0-25
+	MOVQ a+0(FP), AX
+	MOVQ b+8(FP), CX
+	MOVQ l+16(FP), DX
+
+loop:
+	VMOVDQU64 (AX), Z0
+	VMOVDQU64 (CX), Z1
+	VMOVDQU64 64(AX), Z2
+	VMOVDQU64 64(CX), Z3
+	VMOVDQU64 128(AX), Z4
+	VMOVDQU64 128(CX), Z5
+	VMOVDQU64 192(AX), Z6
+	VMOVDQU64 192(CX), Z7
+	VMOVDQU64 256(AX), Z8
+	VMOVDQU64 256(CX), Z9
+	VMOVDQU64 320(AX), Z10
+	VMOVDQU64 320(CX), Z11
+	VMOVDQU64 384(AX), Z12
+	VMOVDQU64 384(CX), Z13
+	VMOVDQU64 448(AX), Z14
+	VMOVDQU64 448(CX), Z15
+
+	// Compute the OR of a&b over all registers in two independent chains;
+	// truth table 0xf8 computes dst | (src2 & src3)
+	VPANDQ     Z0, Z1, Z1
+	VPANDQ     Z8, Z9, Z9
+	VPTERNLOGQ $0xf8, Z3, Z2, Z1
+	VPTERNLOGQ $0xf8, Z11, Z10, Z9
+	VPTERNLOGQ $0xf8, Z5, Z4, Z1
+	VPTERNLOGQ $0xf8, Z13, Z12, Z9
+	VPTERNLOGQ $0xf8, Z7, Z6, Z1
+	VPTERNLOGQ $0xf8, Z15, Z14, Z9
+	VPORQ      Z1, Z9, Z9
+	VPTESTMQ   Z9, Z9, K1
+	KORTESTW   K1, K1
+	JNZ        found
+	ADDQ       $0x00000200, AX
+	ADDQ       $0x00000200, CX
+	SUBQ       $0x00000001, DX
+	JNZ        loop
+	XORB       AL, AL
+	MOVB       AL, ret+24(FP)
+	VZEROALL
+	RET
+
+found:
+	MOVB $0x01, AL
+	MOVB AL, ret+24(FP)
+	VZEROALL
+	RET
+
 // func anyMaskedAVX(a *byte, b *byte, l uint64) bool
 // Requires: AVX
 TEXT ·anyMaskedAVX(SB), NOSPLIT, $0-25

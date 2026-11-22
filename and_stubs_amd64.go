@@ -114,6 +114,11 @@ func anyAVX512(a *byte, l uint64) bool
 //go:noescape
 func anyAVX(a *byte, l uint64) bool
 
+// Returns whether any of the bits of the bitwise and of a and b are set assuming all are 512*l bytes
+//
+//go:noescape
+func anyMaskedAVX512(a *byte, b *byte, l uint64) bool
+
 // Returns whether any of the bits of the bitwise and of a and b are set assuming all are 256*l bytes
 //
 //go:noescape

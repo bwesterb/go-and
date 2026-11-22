@@ -184,12 +184,20 @@ func any_(a []byte) bool {
 
 func anyMasked(a, b []byte) bool {
 	l := uint64(0)
-	if hasAVX() {
-		l = uint64(len(a)) >> 8
-		if l != 0 && anyMaskedAVX(&a[0], &b[0], l) {
+	if len(a) >= 512 && avx512Worthwhile() {
+		l = uint64(len(a)) >> 9
+		if anyMaskedAVX512(&a[0], &b[0], l) {
 			return true
 		}
-		l <<= 8
+		l <<= 9
+	}
+	if hasAVX() {
+		if n := uint64(len(a)-int(l)) >> 8; n != 0 {
+			if anyMaskedAVX(&a[l], &b[l], n) {
+				return true
+			}
+			l += n << 8
+		}
 	}
 	return anyMaskedGeneric(a[l:], b[l:])
 }

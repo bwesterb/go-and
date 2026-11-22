@@ -33,6 +33,7 @@ func main() {
 	genMemset(AVX)
 	genAnyAVX512()
 	genAnyAVX()
+	genAnyMaskedAVX512()
 	genAnyMaskedAVX()
 	Generate()
 }
@@ -411,6 +412,68 @@ func genAnyAVX() {
 	}
 
 	ADDQ(U32(bytes*rounds), a)
+	SUBQ(U32(1), l)
+	JNZ(LabelRef("loop"))
+
+	ret := GP8()
+
+	XORB(ret, ret) // return false
+	Store(ret, ReturnIndex(0))
+	VZEROALL()
+	RET()
+
+	Label("found")
+	MOVB(U8(1), ret) // return true
+	Store(ret, ReturnIndex(0))
+	VZEROALL()
+	RET()
+}
+
+func genAnyMaskedAVX512() {
+	TEXT("anyMaskedAVX512", NOSPLIT, "func(a, b *byte, l uint64) bool")
+
+	Pragma("noescape")
+
+	const bytes = 64
+	const rounds = 8
+
+	Doc(fmt.Sprintf("Returns whether any of the bits of the bitwise and of a and b are set assuming all are %d*l bytes", bytes*rounds))
+	a := Load(Param("a"), GP64())
+	b := Load(Param("b"), GP64())
+	l := Load(Param("l"), GP64())
+
+	var as, bs []Op
+	for range rounds {
+		as = append(as, ZMM())
+		bs = append(bs, ZMM())
+	}
+	mask := K()
+
+	Label("loop")
+
+	for i := range as {
+		VMOVDQU64(Mem{Base: a, Disp: bytes * i}, as[i])
+		VMOVDQU64(Mem{Base: b, Disp: bytes * i}, bs[i])
+	}
+
+	Comment("Compute the OR of a&b over all registers in two independent chains;",
+		"truth table 0xf8 computes dst | (src2 & src3)")
+	const half = rounds / 2
+	acc1, acc2 := bs[0], bs[half]
+	VPANDQ(as[0], acc1, acc1)
+	VPANDQ(as[half], acc2, acc2)
+	for i := 1; i < half; i++ {
+		VPTERNLOGQ(U8(0xf8), bs[i], as[i], acc1)
+		VPTERNLOGQ(U8(0xf8), bs[half+i], as[half+i], acc2)
+	}
+	VPORQ(acc1, acc2, acc2)
+
+	VPTESTMQ(acc2, acc2, mask)
+	KORTESTW(mask, mask)
+	JNZ(LabelRef("found"))
+
+	ADDQ(U32(bytes*rounds), a)
+	ADDQ(U32(bytes*rounds), b)
 	SUBQ(U32(1), l)
 	JNZ(LabelRef("loop"))
 

@@ -11,6 +11,7 @@ import (
 func main() {
 	ConstraintExpr("!purego")
 
+	gen("and", evex(VPANDQ), AVX512, "Sets dst to the bitwise and of a and b")
 	gen("and", VPAND, AVX2, "Sets dst to the bitwise and of a and b")
 	gen("and", VPAND, AVX, "Sets dst to the bitwise and of a and b")
 	gen("or", VPOR, AVX2, "Sets dst to the bitwise or of a and b")

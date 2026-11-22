@@ -4,6 +4,11 @@
 
 package and
 
+// Sets dst to the bitwise and of a and b assuming all are 512*l bytes
+//
+//go:noescape
+func andAVX512(dst *byte, a *byte, b *byte, l uint64)
+
 // Sets dst to the bitwise and of a and b assuming all are 256*l bytes
 //
 //go:noescape

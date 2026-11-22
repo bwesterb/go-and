@@ -18,7 +18,7 @@ func main() {
 }
 ```
 
-Makes use of AVX2 on AMD64 and NEON on ARM64.
+Makes use of AVX2 and AVX-512 on AMD64 and NEON on ARM64.
 
 ## Benchmarks
 
@@ -28,7 +28,7 @@ This shows three benchmarks:
 
 * `naive` is a simple for loop doing one byte at a time.
 * `purego` are our slightly optimized versions that work on uint64s instead of bytes.
-* `asm` are the AVX2 implementations and the reason to use this library.
+* `asm` are the AVX2/AVX-512 implementations and the reason to use this library.
 
 ### AMD Ryzen 9 9900X
 ```
@@ -38,7 +38,7 @@ pkg: github.com/bwesterb/go-and
 cpu: AMD Ryzen 9 9900X 12-Core Processor
                 │     naive     │                purego                 │                 asm                 │
                 │    sec/op     │    sec/op      vs base                │   sec/op     vs base                │
-And-24            7502.0n ±  1%   1678.5n ±  2%  -77.63% (p=0.000 n=10)   250.1n ± 3%  -96.67% (p=0.000 n=10)
+And-24            7502.0n ±  1%   1678.5n ±  2%  -77.63% (p=0.000 n=10)   239.7n ± 0%  -96.80% (p=0.000 n=10)
 Or-24             6815.5n ±  1%   1676.0n ±  2%  -75.41% (p=0.000 n=10)   247.2n ± 4%  -96.37% (p=0.000 n=10)
 Xor-24            7453.0n ±  1%   1679.0n ±  1%  -77.47% (p=0.000 n=10)   251.9n ± 2%  -96.62% (p=0.000 n=10)
 AndNot-24         7731.0n ±  4%   1838.0n ±  1%  -76.23% (p=0.000 n=10)   247.2n ± 0%  -96.80% (p=0.000 n=10)
@@ -46,11 +46,11 @@ AnyMasked-24      9195.5n ± 27%    748.1n ±  0%  -91.86% (p=0.000 n=10)   291.
 Any-24            5822.5n ±  0%    741.2n ±  0%  -87.27% (p=0.000 n=10)   142.2n ± 0%  -97.56% (p=0.000 n=10)
 Popcnt-24         187.35µ ±  0%    29.57µ ± 12%  -84.22% (p=0.000 n=10)   22.63µ ± 0%  -87.92% (p=0.000 n=10)
 PopcntMasked-24   277.55µ ±  0%    91.21µ ±  0%  -67.14% (p=0.000 n=10)   24.59µ ± 0%  -91.14% (p=0.000 n=10)
-geomean            17.35µ          3.267µ        -81.17%                  738.7n       -95.74%
+geomean            17.35µ          3.267µ        -81.17%                  734.8n       -95.76%
 
                 │     naive     │                  purego                  │                   asm                    │
                 │      B/s      │      B/s        vs base                  │      B/s        vs base                  │
-And-24            3.972Gi ±  1%   17.757Gi ±  2%   +347.01% (p=0.000 n=10)   119.157Gi ± 2%  +2899.60% (p=0.000 n=10)
+And-24            3.972Gi ±  1%   17.757Gi ±  2%   +347.01% (p=0.000 n=10)   124.329Gi ± 0%  +3029.79% (p=0.000 n=10)
 Or-24             4.373Gi ±  1%   17.782Gi ±  2%   +306.65% (p=0.000 n=10)   120.569Gi ± 4%  +2657.27% (p=0.000 n=10)
 Xor-24            3.999Gi ±  1%   17.749Gi ±  1%   +343.88% (p=0.000 n=10)   118.306Gi ± 2%  +2858.63% (p=0.000 n=10)
 AndNot-24         3.855Gi ±  3%   16.213Gi ±  1%   +320.60% (p=0.000 n=10)   120.569Gi ± 0%  +3027.75% (p=0.000 n=10)
@@ -58,7 +58,7 @@ AnyMasked-24      3.305Gi ± 23%   39.836Gi ±  0%  +1105.26% (p=0.000 n=10)   1
 Any-24            5.118Gi ±  0%   40.207Gi ±  0%   +685.54% (p=0.000 n=10)   209.618Gi ± 0%  +3995.43% (p=0.000 n=10)
 Popcnt-24         4.971Gi ±  0%   31.500Gi ± 11%   +533.69% (p=0.000 n=10)    41.150Gi ± 0%   +727.82% (p=0.000 n=10)
 PopcntMasked-24   3.355Gi ±  0%   10.210Gi ±  0%   +204.29% (p=0.000 n=10)    37.868Gi ± 0%  +1028.54% (p=0.000 n=10)
-geomean           4.072Gi          21.57Gi         +429.68%                    95.39Gi       +2242.67%
+geomean           4.072Gi          21.57Gi         +429.68%                    95.90Gi       +2255.15%
 ```
 
 ### Intel Core i9-13900

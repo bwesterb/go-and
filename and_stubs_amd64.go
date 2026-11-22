@@ -34,6 +34,11 @@ func orAVX2(dst *byte, a *byte, b *byte, l uint64)
 //go:noescape
 func orAVX(dst *byte, a *byte, b *byte, l uint64)
 
+// Sets dst to the bitwise xor of a and b assuming all are 512*l bytes
+//
+//go:noescape
+func xorAVX512(dst *byte, a *byte, b *byte, l uint64)
+
 // Sets dst to the bitwise xor of a and b assuming all are 256*l bytes
 //
 //go:noescape

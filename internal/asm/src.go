@@ -14,6 +14,7 @@ func main() {
 	gen("and", evex(VPANDQ), AVX512, "Sets dst to the bitwise and of a and b")
 	gen("and", VPAND, AVX2, "Sets dst to the bitwise and of a and b")
 	gen("and", VPAND, AVX, "Sets dst to the bitwise and of a and b")
+	gen("or", evex(VPORQ), AVX512, "Sets dst to the bitwise or of a and b")
 	gen("or", VPOR, AVX2, "Sets dst to the bitwise or of a and b")
 	gen("or", VPOR, AVX, "Sets dst to the bitwise or of a and b")
 	gen("xor", VPXOR, AVX2, "Sets dst to the bitwise xor of a and b")

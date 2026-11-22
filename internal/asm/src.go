@@ -6,6 +6,7 @@ import (
 
 	. "github.com/mmcloughlin/avo/build"
 	. "github.com/mmcloughlin/avo/operand"
+	"github.com/mmcloughlin/avo/reg"
 )
 
 func main() {
@@ -26,6 +27,7 @@ func main() {
 	genNot(AVX512)
 	genNot(AVX2)
 	genNot(AVX)
+	genPopcntAVX512()
 	genPopcnt()
 	genPopcntMasked(AVX)
 	genMemset(AVX512)
@@ -179,6 +181,70 @@ func genNot(avxLevel AVXLevel) {
 	JNZ(LabelRef("loop"))
 
 	VZEROALL()
+	RET()
+}
+
+// Sums the eight quadwords of the ZMM register z into the general purpose
+// register ret, clobbering z.
+func sumQuadwords(z reg.VecVirtual, ret Op) {
+	hi := YMM()
+	VEXTRACTI64X4(U8(1), z, hi)
+	VPADDQ(hi, z.AsY(), z.AsY())
+	hiX := XMM()
+	VEXTRACTI128(U8(1), z.AsY(), hiX)
+	VPADDQ(hiX, z.AsX(), z.AsX())
+	VPSHUFD(U8(0x4e), z.AsX(), hiX)
+	VPADDQ(hiX, z.AsX(), z.AsX())
+	VMOVQ(z.AsX(), ret)
+}
+
+func genPopcntAVX512() {
+	TEXT("popcntAVX512", NOSPLIT, "func(a *byte, l uint64) int")
+
+	Pragma("noescape")
+
+	const bytes = 64
+	const rounds = 8
+	const accs = 4
+
+	Doc(fmt.Sprintf("Counts the number of bits set in a assuming it is %d*l bytes", bytes*rounds))
+	a := Load(Param("a"), GP64())
+	l := Load(Param("l"), GP64())
+
+	var counts []Op
+	for range rounds {
+		counts = append(counts, ZMM())
+	}
+	var acc []reg.VecVirtual
+	for range accs {
+		z := ZMM()
+		VPXORQ(z, z, z)
+		acc = append(acc, z)
+	}
+
+	Label("loop")
+
+	Comment("Count the bits in each quadword, and accumulate into several",
+		"registers to avoid a long dependency chain")
+	for i, r := range counts {
+		VPOPCNTQ(Mem{Base: a, Disp: bytes * i}, r)
+	}
+	for i, r := range counts {
+		VPADDQ(r, acc[i%accs], acc[i%accs])
+	}
+
+	ADDQ(U32(bytes*rounds), a)
+	SUBQ(U32(1), l)
+	JNZ(LabelRef("loop"))
+
+	VPADDQ(acc[1], acc[0], acc[0])
+	VPADDQ(acc[3], acc[2], acc[2])
+	VPADDQ(acc[2], acc[0], acc[0])
+	ret := GP64()
+	sumQuadwords(acc[0], ret)
+
+	VZEROALL()
+	Store(ret, ReturnIndex(0))
 	RET()
 }
 

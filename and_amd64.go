@@ -115,12 +115,16 @@ func not(dst, a []byte) {
 func popcnt(a []byte) int {
 	l := uint64(0)
 	var ret int
+	if len(a) >= 512 && hasAVX512VPOPCNTDQ() {
+		l = uint64(len(a)) >> 9
+		ret = popcntAVX512(&a[0], l)
+		l <<= 9
+	}
 	if hasPopcnt() {
-		l = uint64(len(a)) >> 6
-		if l != 0 {
-			ret = popcntAsm(&a[0], l)
+		if n := uint64(len(a)-int(l)) >> 6; n != 0 {
+			ret += popcntAsm(&a[l], n)
+			l += n << 6
 		}
-		l <<= 6
 	}
 	ret += popcntGeneric(a[l:])
 	return ret

@@ -79,6 +79,11 @@ func notAVX2(dst *byte, a *byte, l uint64)
 //go:noescape
 func notAVX(dst *byte, a *byte, l uint64)
 
+// Counts the number of bits set in a assuming it is 512*l bytes
+//
+//go:noescape
+func popcntAVX512(a *byte, l uint64) int
+
 // Counts the number of bits set in a assuming all are 64*l bytes
 //
 //go:noescape

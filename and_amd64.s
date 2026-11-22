@@ -715,6 +715,52 @@ loop:
 	VZEROALL
 	RET
 
+// func popcntAVX512(a *byte, l uint64) int
+// Requires: AVX, AVX2, AVX512F, AVX512VPOPCNTDQ
+TEXT ·popcntAVX512(SB), NOSPLIT, $0-24
+	MOVQ   a+0(FP), AX
+	MOVQ   l+8(FP), CX
+	VPXORQ Z8, Z8, Z8
+	VPXORQ Z9, Z9, Z9
+	VPXORQ Z10, Z10, Z10
+	VPXORQ Z11, Z11, Z11
+
+loop:
+	// Count the bits in each quadword, and accumulate into several
+	// registers to avoid a long dependency chain
+	VPOPCNTQ      (AX), Z0
+	VPOPCNTQ      64(AX), Z1
+	VPOPCNTQ      128(AX), Z2
+	VPOPCNTQ      192(AX), Z3
+	VPOPCNTQ      256(AX), Z4
+	VPOPCNTQ      320(AX), Z5
+	VPOPCNTQ      384(AX), Z6
+	VPOPCNTQ      448(AX), Z7
+	VPADDQ        Z0, Z8, Z8
+	VPADDQ        Z1, Z9, Z9
+	VPADDQ        Z2, Z10, Z10
+	VPADDQ        Z3, Z11, Z11
+	VPADDQ        Z4, Z8, Z8
+	VPADDQ        Z5, Z9, Z9
+	VPADDQ        Z6, Z10, Z10
+	VPADDQ        Z7, Z11, Z11
+	ADDQ          $0x00000200, AX
+	SUBQ          $0x00000001, CX
+	JNZ           loop
+	VPADDQ        Z9, Z8, Z8
+	VPADDQ        Z11, Z10, Z10
+	VPADDQ        Z10, Z8, Z8
+	VEXTRACTI64X4 $0x01, Z8, Y0
+	VPADDQ        Y0, Y8, Y8
+	VEXTRACTI128  $0x01, Y8, X0
+	VPADDQ        X0, X8, X8
+	VPSHUFD       $0x4e, X8, X0
+	VPADDQ        X0, X8, X8
+	VMOVQ         X8, AX
+	VZEROALL
+	MOVQ          AX, ret+16(FP)
+	RET
+
 // func popcntAsm(a *byte, l uint64) int
 // Requires: POPCNT
 TEXT ·popcntAsm(SB), NOSPLIT, $0-24

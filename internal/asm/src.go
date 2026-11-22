@@ -23,6 +23,7 @@ func main() {
 	gen("andNot", evex(VPANDNQ), AVX512, "Sets dst to the bitwise and of not(a) and b")
 	gen("andNot", VPANDN, AVX2, "Sets dst to the bitwise and of not(a) and b")
 	gen("andNot", VPANDN, AVX, "Sets dst to the bitwise and of not(a) and b")
+	genNot(AVX512)
 	genNot(AVX2)
 	genNot(AVX)
 	genPopcnt()
@@ -140,9 +141,12 @@ func genNot(avxLevel AVXLevel) {
 	a := Load(Param("a"), GP64())
 	l := Load(Param("l"), GP64())
 
-	Comment("Initialize this register to all ones, so we can XOR with it to simulate a NOT")
-	allOnes := avxLevel.CreateRegister()
-	VPCMPEQB(allOnes, allOnes, allOnes)
+	var allOnes Op
+	if avxLevel != AVX512 {
+		Comment("Initialize this register to all ones, so we can XOR with it to simulate a NOT")
+		allOnes = avxLevel.CreateRegister()
+		VPCMPEQB(allOnes, allOnes, allOnes)
+	}
 
 	var as []Op
 	for i := 0; rounds > i; i++ {
@@ -152,13 +156,19 @@ func genNot(avxLevel AVXLevel) {
 	Label("loop")
 
 	for i := 0; i < len(as); i++ {
-		VMOVDQU(Mem{Base: a, Disp: avxLevel.Bytes() * i}, as[i])
+		avxLevel.MOVDQU(Mem{Base: a, Disp: avxLevel.Bytes() * i}, as[i])
 	}
 	for i := 0; i < len(as); i++ {
-		VPXOR(as[i], allOnes, as[i])
+		if avxLevel == AVX512 {
+			// VPTERNLOGQ with truth table 0x55 computes the NOT of its
+			// first source operand directly, without an all-ones register.
+			VPTERNLOGQ(U8(0x55), as[i], as[i], as[i])
+		} else {
+			VPXOR(as[i], allOnes, as[i])
+		}
 	}
 	for i := 0; i < len(as); i++ {
-		VMOVDQU(as[i], Mem{Base: dst, Disp: avxLevel.Bytes() * i})
+		avxLevel.MOVDQU(as[i], Mem{Base: dst, Disp: avxLevel.Bytes() * i})
 	}
 
 	ADDQ(U32(avxLevel.Bytes()*rounds), a)

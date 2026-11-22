@@ -104,6 +104,11 @@ func memsetAVX2(dst *byte, l uint64, b byte)
 //go:noescape
 func memsetAVX(dst *byte, l uint64, b byte)
 
+// Returns whether any of the bits of a is set assuming it is 512*l bytes
+//
+//go:noescape
+func anyAVX512(a *byte, l uint64) bool
+
 // Returns whether any of the bits of of a is set
 //
 //go:noescape

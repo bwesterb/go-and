@@ -849,6 +849,44 @@ DATA zeroes<>+8(SB)/4, $0x00000000
 DATA zeroes<>+12(SB)/4, $0x00000000
 GLOBL zeroes<>(SB), RODATA|NOPTR, $16
 
+// func anyAVX512(a *byte, l uint64) bool
+// Requires: AVX, AVX512F
+TEXT ·anyAVX512(SB), NOSPLIT, $0-17
+	MOVQ a+0(FP), AX
+	MOVQ l+8(FP), CX
+
+loop:
+	VMOVDQU64 (AX), Z0
+	VMOVDQU64 64(AX), Z1
+	VMOVDQU64 128(AX), Z2
+	VMOVDQU64 192(AX), Z3
+	VMOVDQU64 256(AX), Z4
+	VMOVDQU64 320(AX), Z5
+	VMOVDQU64 384(AX), Z6
+	VMOVDQU64 448(AX), Z7
+
+	// OR all registers together; truth table 0xfe is the OR of three operands
+	VPTERNLOGQ $0xfe, Z0, Z1, Z2
+	VPTERNLOGQ $0xfe, Z3, Z4, Z5
+	VPTERNLOGQ $0xfe, Z2, Z6, Z7
+	VPORQ      Z5, Z7, Z7
+	VPTESTMQ   Z7, Z7, K1
+	KORTESTW   K1, K1
+	JNZ        found
+	ADDQ       $0x00000200, AX
+	SUBQ       $0x00000001, CX
+	JNZ        loop
+	XORB       AL, AL
+	MOVB       AL, ret+16(FP)
+	VZEROALL
+	RET
+
+found:
+	MOVB $0x01, AL
+	MOVB AL, ret+16(FP)
+	VZEROALL
+	RET
+
 // func anyAVX(a *byte, l uint64) bool
 // Requires: AVX
 TEXT ·anyAVX(SB), NOSPLIT, $0-17

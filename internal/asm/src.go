@@ -31,6 +31,7 @@ func main() {
 	genMemset(AVX512)
 	genMemset(AVX2)
 	genMemset(AVX)
+	genAnyAVX512()
 	genAnyAVX()
 	genAnyMaskedAVX()
 	Generate()
@@ -325,6 +326,58 @@ func genMemset(avxLevel AVXLevel) {
 	SUBQ(U32(1), l)
 	JNZ(LabelRef("loop"))
 
+	VZEROALL()
+	RET()
+}
+
+func genAnyAVX512() {
+	TEXT("anyAVX512", NOSPLIT, "func(a *byte, l uint64) bool")
+
+	Pragma("noescape")
+
+	const bytes = 64
+	const rounds = 8
+
+	Doc(fmt.Sprintf("Returns whether any of the bits of a is set assuming it is %d*l bytes", bytes*rounds))
+	a := Load(Param("a"), GP64())
+	l := Load(Param("l"), GP64())
+
+	var as []Op
+	for range rounds {
+		as = append(as, ZMM())
+	}
+	mask := K()
+
+	Label("loop")
+
+	for i, r := range as {
+		VMOVDQU64(Mem{Base: a, Disp: bytes * i}, r)
+	}
+
+	Comment("OR all registers together; truth table 0xfe is the OR of three operands")
+	VPTERNLOGQ(U8(0xfe), as[0], as[1], as[2])
+	VPTERNLOGQ(U8(0xfe), as[3], as[4], as[5])
+	VPTERNLOGQ(U8(0xfe), as[2], as[6], as[7])
+	VPORQ(as[5], as[7], as[7])
+
+	VPTESTMQ(as[7], as[7], mask)
+	KORTESTW(mask, mask)
+	JNZ(LabelRef("found"))
+
+	ADDQ(U32(bytes*rounds), a)
+	SUBQ(U32(1), l)
+	JNZ(LabelRef("loop"))
+
+	ret := GP8()
+
+	XORB(ret, ret) // return false
+	Store(ret, ReturnIndex(0))
+	VZEROALL()
+	RET()
+
+	Label("found")
+	MOVB(U8(1), ret) // return true
+	Store(ret, ReturnIndex(0))
 	VZEROALL()
 	RET()
 }

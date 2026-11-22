@@ -126,12 +126,16 @@ func popcntMasked(a, b []byte) int {
 
 func memset(dst []byte, b byte) {
 	l := uint64(0)
+	if len(dst) >= 64 && avx512Worthwhile() {
+		l = uint64(len(dst)) >> 6
+		memsetAVX512(&dst[0], l, b)
+		l <<= 6
+	}
 	if hasAVX2() {
-		l = uint64(len(dst)) >> 5
-		if l != 0 {
-			memsetAVX2(&dst[0], l, b)
+		if n := uint64(len(dst)-int(l)) >> 5; n != 0 {
+			memsetAVX2(&dst[l], n, b)
+			l += n << 5
 		}
-		l <<= 5
 	} else if hasAVX() {
 		l = uint64(len(dst)) >> 4
 		if l != 0 {

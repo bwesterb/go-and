@@ -608,6 +608,23 @@ loop:
 	MOVQ    BX, ret+24(FP)
 	RET
 
+// func memsetAVX512(dst *byte, l uint64, b byte)
+// Requires: AVX, AVX512F
+TEXT ·memsetAVX512(SB), NOSPLIT, $0-17
+	MOVQ         dst+0(FP), AX
+	MOVQ         l+8(FP), CX
+	MOVBLZX      b+16(FP), DX
+	IMUL3L       $0x01010101, DX, DX
+	VPBROADCASTD DX, Z0
+
+loop:
+	VMOVDQU64 Z0, (AX)
+	ADDQ      $0x00000040, AX
+	SUBQ      $0x00000001, CX
+	JNZ       loop
+	VZEROALL
+	RET
+
 // func memsetAVX2(dst *byte, l uint64, b byte)
 // Requires: AVX, AVX2
 TEXT ·memsetAVX2(SB), NOSPLIT, $0-17

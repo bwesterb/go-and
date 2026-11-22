@@ -72,6 +72,11 @@ func popcntMaskedAsmAVX(a *byte, b *byte, l uint64) int
 // Sets each byte in dst to b
 //
 //go:noescape
+func memsetAVX512(dst *byte, l uint64, b byte)
+
+// Sets each byte in dst to b
+//
+//go:noescape
 func memsetAVX2(dst *byte, l uint64, b byte)
 
 // Sets each byte in dst to b

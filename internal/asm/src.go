@@ -24,6 +24,7 @@ func main() {
 	genNot(AVX)
 	genPopcnt()
 	genPopcntMasked(AVX)
+	genMemset(AVX512)
 	genMemset(AVX2)
 	genMemset(AVX)
 	genAnyAVX()
@@ -278,9 +279,18 @@ func genMemset(avxLevel AVXLevel) {
 	if err != nil {
 		panic(err)
 	}
-	if avxLevel == AVX2 {
+	switch avxLevel {
+	case AVX512:
+		// VPBROADCASTB to a ZMM register requires AVX512BW, so instead
+		// repeat b four times in a general purpose register and use
+		// VPBROADCASTD, which only requires AVX512F.
+		tmp := GP32()
+		MOVBLZX(b.Addr, tmp)
+		IMUL3L(U32(0x01010101), tmp, tmp)
+		VPBROADCASTD(tmp, bRepeated)
+	case AVX2:
 		VPBROADCASTB(b.Addr, bRepeated)
-	} else {
+	default:
 		zeroes := GLOBL("zeroes", RODATA|NOPTR)
 		DATA(0, U32(0))
 		DATA(4, U32(0))

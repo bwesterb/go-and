@@ -4,6 +4,55 @@
 
 #include "textflag.h"
 
+// func andAVX512(dst *byte, a *byte, b *byte, l uint64)
+// Requires: AVX, AVX512F
+TEXT ·andAVX512(SB), NOSPLIT, $0-32
+	MOVQ a+8(FP), AX
+	MOVQ b+16(FP), CX
+	MOVQ dst+0(FP), DX
+	MOVQ l+24(FP), BX
+
+loop:
+	VMOVDQU64 (AX), Z0
+	VMOVDQU64 (CX), Z1
+	VMOVDQU64 64(AX), Z2
+	VMOVDQU64 64(CX), Z3
+	VMOVDQU64 128(AX), Z4
+	VMOVDQU64 128(CX), Z5
+	VMOVDQU64 192(AX), Z6
+	VMOVDQU64 192(CX), Z7
+	VMOVDQU64 256(AX), Z8
+	VMOVDQU64 256(CX), Z9
+	VMOVDQU64 320(AX), Z10
+	VMOVDQU64 320(CX), Z11
+	VMOVDQU64 384(AX), Z12
+	VMOVDQU64 384(CX), Z13
+	VMOVDQU64 448(AX), Z14
+	VMOVDQU64 448(CX), Z15
+	VPANDQ    Z1, Z0, Z1
+	VPANDQ    Z3, Z2, Z3
+	VPANDQ    Z5, Z4, Z5
+	VPANDQ    Z7, Z6, Z7
+	VPANDQ    Z9, Z8, Z9
+	VPANDQ    Z11, Z10, Z11
+	VPANDQ    Z13, Z12, Z13
+	VPANDQ    Z15, Z14, Z15
+	VMOVDQU64 Z1, (DX)
+	VMOVDQU64 Z3, 64(DX)
+	VMOVDQU64 Z5, 128(DX)
+	VMOVDQU64 Z7, 192(DX)
+	VMOVDQU64 Z9, 256(DX)
+	VMOVDQU64 Z11, 320(DX)
+	VMOVDQU64 Z13, 384(DX)
+	VMOVDQU64 Z15, 448(DX)
+	ADDQ      $0x00000200, AX
+	ADDQ      $0x00000200, CX
+	ADDQ      $0x00000200, DX
+	SUBQ      $0x00000001, BX
+	JNZ       loop
+	VZEROALL
+	RET
+
 // func andAVX2(dst *byte, a *byte, b *byte, l uint64)
 // Requires: AVX, AVX2
 TEXT ·andAVX2(SB), NOSPLIT, $0-32
@@ -99,6 +148,55 @@ loop:
 	ADDQ    $0x00000080, DX
 	SUBQ    $0x00000001, BX
 	JNZ     loop
+	VZEROALL
+	RET
+
+// func orAVX512(dst *byte, a *byte, b *byte, l uint64)
+// Requires: AVX, AVX512F
+TEXT ·orAVX512(SB), NOSPLIT, $0-32
+	MOVQ a+8(FP), AX
+	MOVQ b+16(FP), CX
+	MOVQ dst+0(FP), DX
+	MOVQ l+24(FP), BX
+
+loop:
+	VMOVDQU64 (AX), Z0
+	VMOVDQU64 (CX), Z1
+	VMOVDQU64 64(AX), Z2
+	VMOVDQU64 64(CX), Z3
+	VMOVDQU64 128(AX), Z4
+	VMOVDQU64 128(CX), Z5
+	VMOVDQU64 192(AX), Z6
+	VMOVDQU64 192(CX), Z7
+	VMOVDQU64 256(AX), Z8
+	VMOVDQU64 256(CX), Z9
+	VMOVDQU64 320(AX), Z10
+	VMOVDQU64 320(CX), Z11
+	VMOVDQU64 384(AX), Z12
+	VMOVDQU64 384(CX), Z13
+	VMOVDQU64 448(AX), Z14
+	VMOVDQU64 448(CX), Z15
+	VPORQ     Z1, Z0, Z1
+	VPORQ     Z3, Z2, Z3
+	VPORQ     Z5, Z4, Z5
+	VPORQ     Z7, Z6, Z7
+	VPORQ     Z9, Z8, Z9
+	VPORQ     Z11, Z10, Z11
+	VPORQ     Z13, Z12, Z13
+	VPORQ     Z15, Z14, Z15
+	VMOVDQU64 Z1, (DX)
+	VMOVDQU64 Z3, 64(DX)
+	VMOVDQU64 Z5, 128(DX)
+	VMOVDQU64 Z7, 192(DX)
+	VMOVDQU64 Z9, 256(DX)
+	VMOVDQU64 Z11, 320(DX)
+	VMOVDQU64 Z13, 384(DX)
+	VMOVDQU64 Z15, 448(DX)
+	ADDQ      $0x00000200, AX
+	ADDQ      $0x00000200, CX
+	ADDQ      $0x00000200, DX
+	SUBQ      $0x00000001, BX
+	JNZ       loop
 	VZEROALL
 	RET
 
@@ -200,6 +298,55 @@ loop:
 	VZEROALL
 	RET
 
+// func xorAVX512(dst *byte, a *byte, b *byte, l uint64)
+// Requires: AVX, AVX512F
+TEXT ·xorAVX512(SB), NOSPLIT, $0-32
+	MOVQ a+8(FP), AX
+	MOVQ b+16(FP), CX
+	MOVQ dst+0(FP), DX
+	MOVQ l+24(FP), BX
+
+loop:
+	VMOVDQU64 (AX), Z0
+	VMOVDQU64 (CX), Z1
+	VMOVDQU64 64(AX), Z2
+	VMOVDQU64 64(CX), Z3
+	VMOVDQU64 128(AX), Z4
+	VMOVDQU64 128(CX), Z5
+	VMOVDQU64 192(AX), Z6
+	VMOVDQU64 192(CX), Z7
+	VMOVDQU64 256(AX), Z8
+	VMOVDQU64 256(CX), Z9
+	VMOVDQU64 320(AX), Z10
+	VMOVDQU64 320(CX), Z11
+	VMOVDQU64 384(AX), Z12
+	VMOVDQU64 384(CX), Z13
+	VMOVDQU64 448(AX), Z14
+	VMOVDQU64 448(CX), Z15
+	VPXORQ    Z1, Z0, Z1
+	VPXORQ    Z3, Z2, Z3
+	VPXORQ    Z5, Z4, Z5
+	VPXORQ    Z7, Z6, Z7
+	VPXORQ    Z9, Z8, Z9
+	VPXORQ    Z11, Z10, Z11
+	VPXORQ    Z13, Z12, Z13
+	VPXORQ    Z15, Z14, Z15
+	VMOVDQU64 Z1, (DX)
+	VMOVDQU64 Z3, 64(DX)
+	VMOVDQU64 Z5, 128(DX)
+	VMOVDQU64 Z7, 192(DX)
+	VMOVDQU64 Z9, 256(DX)
+	VMOVDQU64 Z11, 320(DX)
+	VMOVDQU64 Z13, 384(DX)
+	VMOVDQU64 Z15, 448(DX)
+	ADDQ      $0x00000200, AX
+	ADDQ      $0x00000200, CX
+	ADDQ      $0x00000200, DX
+	SUBQ      $0x00000001, BX
+	JNZ       loop
+	VZEROALL
+	RET
+
 // func xorAVX2(dst *byte, a *byte, b *byte, l uint64)
 // Requires: AVX, AVX2
 TEXT ·xorAVX2(SB), NOSPLIT, $0-32
@@ -295,6 +442,55 @@ loop:
 	ADDQ    $0x00000080, DX
 	SUBQ    $0x00000001, BX
 	JNZ     loop
+	VZEROALL
+	RET
+
+// func andNotAVX512(dst *byte, a *byte, b *byte, l uint64)
+// Requires: AVX, AVX512F
+TEXT ·andNotAVX512(SB), NOSPLIT, $0-32
+	MOVQ a+8(FP), AX
+	MOVQ b+16(FP), CX
+	MOVQ dst+0(FP), DX
+	MOVQ l+24(FP), BX
+
+loop:
+	VMOVDQU64 (AX), Z0
+	VMOVDQU64 (CX), Z1
+	VMOVDQU64 64(AX), Z2
+	VMOVDQU64 64(CX), Z3
+	VMOVDQU64 128(AX), Z4
+	VMOVDQU64 128(CX), Z5
+	VMOVDQU64 192(AX), Z6
+	VMOVDQU64 192(CX), Z7
+	VMOVDQU64 256(AX), Z8
+	VMOVDQU64 256(CX), Z9
+	VMOVDQU64 320(AX), Z10
+	VMOVDQU64 320(CX), Z11
+	VMOVDQU64 384(AX), Z12
+	VMOVDQU64 384(CX), Z13
+	VMOVDQU64 448(AX), Z14
+	VMOVDQU64 448(CX), Z15
+	VPANDNQ   Z1, Z0, Z1
+	VPANDNQ   Z3, Z2, Z3
+	VPANDNQ   Z5, Z4, Z5
+	VPANDNQ   Z7, Z6, Z7
+	VPANDNQ   Z9, Z8, Z9
+	VPANDNQ   Z11, Z10, Z11
+	VPANDNQ   Z13, Z12, Z13
+	VPANDNQ   Z15, Z14, Z15
+	VMOVDQU64 Z1, (DX)
+	VMOVDQU64 Z3, 64(DX)
+	VMOVDQU64 Z5, 128(DX)
+	VMOVDQU64 Z7, 192(DX)
+	VMOVDQU64 Z9, 256(DX)
+	VMOVDQU64 Z11, 320(DX)
+	VMOVDQU64 Z13, 384(DX)
+	VMOVDQU64 Z15, 448(DX)
+	ADDQ      $0x00000200, AX
+	ADDQ      $0x00000200, CX
+	ADDQ      $0x00000200, DX
+	SUBQ      $0x00000001, BX
+	JNZ       loop
 	VZEROALL
 	RET
 
@@ -396,6 +592,45 @@ loop:
 	VZEROALL
 	RET
 
+// func notAVX512(dst *byte, a *byte, l uint64)
+// Requires: AVX, AVX512F
+TEXT ·notAVX512(SB), NOSPLIT, $0-24
+	MOVQ dst+0(FP), AX
+	MOVQ a+8(FP), CX
+	MOVQ l+16(FP), DX
+
+loop:
+	VMOVDQU64  (CX), Z0
+	VMOVDQU64  64(CX), Z1
+	VMOVDQU64  128(CX), Z2
+	VMOVDQU64  192(CX), Z3
+	VMOVDQU64  256(CX), Z4
+	VMOVDQU64  320(CX), Z5
+	VMOVDQU64  384(CX), Z6
+	VMOVDQU64  448(CX), Z7
+	VPTERNLOGQ $0x55, Z0, Z0, Z0
+	VPTERNLOGQ $0x55, Z1, Z1, Z1
+	VPTERNLOGQ $0x55, Z2, Z2, Z2
+	VPTERNLOGQ $0x55, Z3, Z3, Z3
+	VPTERNLOGQ $0x55, Z4, Z4, Z4
+	VPTERNLOGQ $0x55, Z5, Z5, Z5
+	VPTERNLOGQ $0x55, Z6, Z6, Z6
+	VPTERNLOGQ $0x55, Z7, Z7, Z7
+	VMOVDQU64  Z0, (AX)
+	VMOVDQU64  Z1, 64(AX)
+	VMOVDQU64  Z2, 128(AX)
+	VMOVDQU64  Z3, 192(AX)
+	VMOVDQU64  Z4, 256(AX)
+	VMOVDQU64  Z5, 320(AX)
+	VMOVDQU64  Z6, 384(AX)
+	VMOVDQU64  Z7, 448(AX)
+	ADDQ       $0x00000200, CX
+	ADDQ       $0x00000200, AX
+	SUBQ       $0x00000001, DX
+	JNZ        loop
+	VZEROALL
+	RET
+
 // func notAVX2(dst *byte, a *byte, l uint64)
 // Requires: AVX, AVX2
 TEXT ·notAVX2(SB), NOSPLIT, $0-24
@@ -480,6 +715,52 @@ loop:
 	VZEROALL
 	RET
 
+// func popcntAVX512(a *byte, l uint64) int
+// Requires: AVX, AVX2, AVX512F, AVX512VPOPCNTDQ
+TEXT ·popcntAVX512(SB), NOSPLIT, $0-24
+	MOVQ   a+0(FP), AX
+	MOVQ   l+8(FP), CX
+	VPXORQ Z8, Z8, Z8
+	VPXORQ Z9, Z9, Z9
+	VPXORQ Z10, Z10, Z10
+	VPXORQ Z11, Z11, Z11
+
+loop:
+	// Count the bits in each quadword, and accumulate into several
+	// registers to avoid a long dependency chain
+	VPOPCNTQ      (AX), Z0
+	VPOPCNTQ      64(AX), Z1
+	VPOPCNTQ      128(AX), Z2
+	VPOPCNTQ      192(AX), Z3
+	VPOPCNTQ      256(AX), Z4
+	VPOPCNTQ      320(AX), Z5
+	VPOPCNTQ      384(AX), Z6
+	VPOPCNTQ      448(AX), Z7
+	VPADDQ        Z0, Z8, Z8
+	VPADDQ        Z1, Z9, Z9
+	VPADDQ        Z2, Z10, Z10
+	VPADDQ        Z3, Z11, Z11
+	VPADDQ        Z4, Z8, Z8
+	VPADDQ        Z5, Z9, Z9
+	VPADDQ        Z6, Z10, Z10
+	VPADDQ        Z7, Z11, Z11
+	ADDQ          $0x00000200, AX
+	SUBQ          $0x00000001, CX
+	JNZ           loop
+	VPADDQ        Z9, Z8, Z8
+	VPADDQ        Z11, Z10, Z10
+	VPADDQ        Z10, Z8, Z8
+	VEXTRACTI64X4 $0x01, Z8, Y0
+	VPADDQ        Y0, Y8, Y8
+	VEXTRACTI128  $0x01, Y8, X0
+	VPADDQ        X0, X8, X8
+	VPSHUFD       $0x4e, X8, X0
+	VPADDQ        X0, X8, X8
+	VMOVQ         X8, AX
+	VZEROALL
+	MOVQ          AX, ret+16(FP)
+	RET
+
 // func popcntAsm(a *byte, l uint64) int
 // Requires: POPCNT
 TEXT ·popcntAsm(SB), NOSPLIT, $0-24
@@ -518,6 +799,71 @@ loop:
 	SUBQ    $0x00000001, CX
 	JNZ     loop
 	MOVQ    DX, ret+16(FP)
+	RET
+
+// func popcntMaskedAVX512(a *byte, b *byte, l uint64) int
+// Requires: AVX, AVX2, AVX512F, AVX512VPOPCNTDQ
+TEXT ·popcntMaskedAVX512(SB), NOSPLIT, $0-32
+	MOVQ   a+0(FP), AX
+	MOVQ   b+8(FP), CX
+	MOVQ   l+16(FP), DX
+	VPXORQ Z8, Z8, Z8
+	VPXORQ Z9, Z9, Z9
+	VPXORQ Z10, Z10, Z10
+	VPXORQ Z11, Z11, Z11
+
+loop:
+	VMOVDQU64 (AX), Z0
+	VMOVDQU64 64(AX), Z1
+	VMOVDQU64 128(AX), Z2
+	VMOVDQU64 192(AX), Z3
+	VMOVDQU64 256(AX), Z4
+	VMOVDQU64 320(AX), Z5
+	VMOVDQU64 384(AX), Z6
+	VMOVDQU64 448(AX), Z7
+	VPANDQ    (CX), Z0, Z0
+	VPANDQ    64(CX), Z1, Z1
+	VPANDQ    128(CX), Z2, Z2
+	VPANDQ    192(CX), Z3, Z3
+	VPANDQ    256(CX), Z4, Z4
+	VPANDQ    320(CX), Z5, Z5
+	VPANDQ    384(CX), Z6, Z6
+	VPANDQ    448(CX), Z7, Z7
+
+	// Count the bits in each quadword, and accumulate into several
+	// registers to avoid a long dependency chain
+	VPOPCNTQ      Z0, Z0
+	VPOPCNTQ      Z1, Z1
+	VPOPCNTQ      Z2, Z2
+	VPOPCNTQ      Z3, Z3
+	VPOPCNTQ      Z4, Z4
+	VPOPCNTQ      Z5, Z5
+	VPOPCNTQ      Z6, Z6
+	VPOPCNTQ      Z7, Z7
+	VPADDQ        Z0, Z8, Z8
+	VPADDQ        Z1, Z9, Z9
+	VPADDQ        Z2, Z10, Z10
+	VPADDQ        Z3, Z11, Z11
+	VPADDQ        Z4, Z8, Z8
+	VPADDQ        Z5, Z9, Z9
+	VPADDQ        Z6, Z10, Z10
+	VPADDQ        Z7, Z11, Z11
+	ADDQ          $0x00000200, AX
+	ADDQ          $0x00000200, CX
+	SUBQ          $0x00000001, DX
+	JNZ           loop
+	VPADDQ        Z9, Z8, Z8
+	VPADDQ        Z11, Z10, Z10
+	VPADDQ        Z10, Z8, Z8
+	VEXTRACTI64X4 $0x01, Z8, Y0
+	VPADDQ        Y0, Y8, Y8
+	VEXTRACTI128  $0x01, Y8, X0
+	VPADDQ        X0, X8, X8
+	VPSHUFD       $0x4e, X8, X0
+	VPADDQ        X0, X8, X8
+	VMOVQ         X8, AX
+	VZEROALL
+	MOVQ          AX, ret+24(FP)
 	RET
 
 // func popcntMaskedAsmAVX(a *byte, b *byte, l uint64) int
@@ -559,6 +905,23 @@ loop:
 	MOVQ    BX, ret+24(FP)
 	RET
 
+// func memsetAVX512(dst *byte, l uint64, b byte)
+// Requires: AVX, AVX512F
+TEXT ·memsetAVX512(SB), NOSPLIT, $0-17
+	MOVQ         dst+0(FP), AX
+	MOVQ         l+8(FP), CX
+	MOVBLZX      b+16(FP), DX
+	IMUL3L       $0x01010101, DX, DX
+	VPBROADCASTD DX, Z0
+
+loop:
+	VMOVDQU64 Z0, (AX)
+	ADDQ      $0x00000040, AX
+	SUBQ      $0x00000001, CX
+	JNZ       loop
+	VZEROALL
+	RET
+
 // func memsetAVX2(dst *byte, l uint64, b byte)
 // Requires: AVX, AVX2
 TEXT ·memsetAVX2(SB), NOSPLIT, $0-17
@@ -596,6 +959,44 @@ DATA zeroes<>+4(SB)/4, $0x00000000
 DATA zeroes<>+8(SB)/4, $0x00000000
 DATA zeroes<>+12(SB)/4, $0x00000000
 GLOBL zeroes<>(SB), RODATA|NOPTR, $16
+
+// func anyAVX512(a *byte, l uint64) bool
+// Requires: AVX, AVX512F
+TEXT ·anyAVX512(SB), NOSPLIT, $0-17
+	MOVQ a+0(FP), AX
+	MOVQ l+8(FP), CX
+
+loop:
+	VMOVDQU64 (AX), Z0
+	VMOVDQU64 64(AX), Z1
+	VMOVDQU64 128(AX), Z2
+	VMOVDQU64 192(AX), Z3
+	VMOVDQU64 256(AX), Z4
+	VMOVDQU64 320(AX), Z5
+	VMOVDQU64 384(AX), Z6
+	VMOVDQU64 448(AX), Z7
+
+	// OR all registers together; truth table 0xfe is the OR of three operands
+	VPTERNLOGQ $0xfe, Z0, Z1, Z2
+	VPTERNLOGQ $0xfe, Z3, Z4, Z5
+	VPTERNLOGQ $0xfe, Z2, Z6, Z7
+	VPORQ      Z5, Z7, Z7
+	VPTESTMQ   Z7, Z7, K1
+	KORTESTW   K1, K1
+	JNZ        found
+	ADDQ       $0x00000200, AX
+	SUBQ       $0x00000001, CX
+	JNZ        loop
+	XORB       AL, AL
+	MOVB       AL, ret+16(FP)
+	VZEROALL
+	RET
+
+found:
+	MOVB $0x01, AL
+	MOVB AL, ret+16(FP)
+	VZEROALL
+	RET
 
 // func anyAVX(a *byte, l uint64) bool
 // Requires: AVX
@@ -639,6 +1040,60 @@ loop:
 found:
 	MOVB $0x01, AL
 	MOVB AL, ret+16(FP)
+	VZEROALL
+	RET
+
+// func anyMaskedAVX512(a *byte, b *byte, l uint64) bool
+// Requires: AVX, AVX512F
+TEXT ·anyMaskedAVX512(SB), NOSPLIT, $0-25
+	MOVQ a+0(FP), AX
+	MOVQ b+8(FP), CX
+	MOVQ l+16(FP), DX
+
+loop:
+	VMOVDQU64 (AX), Z0
+	VMOVDQU64 (CX), Z1
+	VMOVDQU64 64(AX), Z2
+	VMOVDQU64 64(CX), Z3
+	VMOVDQU64 128(AX), Z4
+	VMOVDQU64 128(CX), Z5
+	VMOVDQU64 192(AX), Z6
+	VMOVDQU64 192(CX), Z7
+	VMOVDQU64 256(AX), Z8
+	VMOVDQU64 256(CX), Z9
+	VMOVDQU64 320(AX), Z10
+	VMOVDQU64 320(CX), Z11
+	VMOVDQU64 384(AX), Z12
+	VMOVDQU64 384(CX), Z13
+	VMOVDQU64 448(AX), Z14
+	VMOVDQU64 448(CX), Z15
+
+	// Compute the OR of a&b over all registers in two independent chains;
+	// truth table 0xf8 computes dst | (src2 & src3)
+	VPANDQ     Z0, Z1, Z1
+	VPANDQ     Z8, Z9, Z9
+	VPTERNLOGQ $0xf8, Z3, Z2, Z1
+	VPTERNLOGQ $0xf8, Z11, Z10, Z9
+	VPTERNLOGQ $0xf8, Z5, Z4, Z1
+	VPTERNLOGQ $0xf8, Z13, Z12, Z9
+	VPTERNLOGQ $0xf8, Z7, Z6, Z1
+	VPTERNLOGQ $0xf8, Z15, Z14, Z9
+	VPORQ      Z1, Z9, Z9
+	VPTESTMQ   Z9, Z9, K1
+	KORTESTW   K1, K1
+	JNZ        found
+	ADDQ       $0x00000200, AX
+	ADDQ       $0x00000200, CX
+	SUBQ       $0x00000001, DX
+	JNZ        loop
+	XORB       AL, AL
+	MOVB       AL, ret+24(FP)
+	VZEROALL
+	RET
+
+found:
+	MOVB $0x01, AL
+	MOVB AL, ret+24(FP)
 	VZEROALL
 	RET
 

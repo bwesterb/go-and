@@ -4,6 +4,11 @@
 
 package and
 
+// Sets dst to the bitwise and of a and b assuming all are 512*l bytes
+//
+//go:noescape
+func andAVX512(dst *byte, a *byte, b *byte, l uint64)
+
 // Sets dst to the bitwise and of a and b assuming all are 256*l bytes
 //
 //go:noescape
@@ -13,6 +18,11 @@ func andAVX2(dst *byte, a *byte, b *byte, l uint64)
 //
 //go:noescape
 func andAVX(dst *byte, a *byte, b *byte, l uint64)
+
+// Sets dst to the bitwise or of a and b assuming all are 512*l bytes
+//
+//go:noescape
+func orAVX512(dst *byte, a *byte, b *byte, l uint64)
 
 // Sets dst to the bitwise or of a and b assuming all are 256*l bytes
 //
@@ -24,6 +34,11 @@ func orAVX2(dst *byte, a *byte, b *byte, l uint64)
 //go:noescape
 func orAVX(dst *byte, a *byte, b *byte, l uint64)
 
+// Sets dst to the bitwise xor of a and b assuming all are 512*l bytes
+//
+//go:noescape
+func xorAVX512(dst *byte, a *byte, b *byte, l uint64)
+
 // Sets dst to the bitwise xor of a and b assuming all are 256*l bytes
 //
 //go:noescape
@@ -33,6 +48,11 @@ func xorAVX2(dst *byte, a *byte, b *byte, l uint64)
 //
 //go:noescape
 func xorAVX(dst *byte, a *byte, b *byte, l uint64)
+
+// Sets dst to the bitwise and of not(a) and b assuming all are 512*l bytes
+//
+//go:noescape
+func andNotAVX512(dst *byte, a *byte, b *byte, l uint64)
 
 // Sets dst to the bitwise and of not(a) and b assuming all are 256*l bytes
 //
@@ -47,6 +67,11 @@ func andNotAVX(dst *byte, a *byte, b *byte, l uint64)
 // Bitwise inverts each byte of a into dst
 //
 //go:noescape
+func notAVX512(dst *byte, a *byte, l uint64)
+
+// Bitwise inverts each byte of a into dst
+//
+//go:noescape
 func notAVX2(dst *byte, a *byte, l uint64)
 
 // Bitwise inverts each byte of a into dst
@@ -54,15 +79,30 @@ func notAVX2(dst *byte, a *byte, l uint64)
 //go:noescape
 func notAVX(dst *byte, a *byte, l uint64)
 
+// Counts the number of bits set in a assuming it is 512*l bytes
+//
+//go:noescape
+func popcntAVX512(a *byte, l uint64) int
+
 // Counts the number of bits set in a assuming all are 64*l bytes
 //
 //go:noescape
 func popcntAsm(a *byte, l uint64) int
 
+// Counts the number of bits set in a&b assuming both are 512*l bytes
+//
+//go:noescape
+func popcntMaskedAVX512(a *byte, b *byte, l uint64) int
+
 // Counts the number of bits set in a&b assuming both are 32*l bytes
 //
 //go:noescape
 func popcntMaskedAsmAVX(a *byte, b *byte, l uint64) int
+
+// Sets each byte in dst to b
+//
+//go:noescape
+func memsetAVX512(dst *byte, l uint64, b byte)
 
 // Sets each byte in dst to b
 //
@@ -74,10 +114,20 @@ func memsetAVX2(dst *byte, l uint64, b byte)
 //go:noescape
 func memsetAVX(dst *byte, l uint64, b byte)
 
+// Returns whether any of the bits of a is set assuming it is 512*l bytes
+//
+//go:noescape
+func anyAVX512(a *byte, l uint64) bool
+
 // Returns whether any of the bits of of a is set
 //
 //go:noescape
 func anyAVX(a *byte, l uint64) bool
+
+// Returns whether any of the bits of the bitwise and of a and b are set assuming all are 512*l bytes
+//
+//go:noescape
+func anyMaskedAVX512(a *byte, b *byte, l uint64) bool
 
 // Returns whether any of the bits of the bitwise and of a and b are set assuming all are 256*l bytes
 //

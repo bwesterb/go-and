@@ -4,12 +4,16 @@ package and
 
 func and(dst, a, b []byte) {
 	l := uint64(0)
+	if len(a) >= 512 && avx512Worthwhile() {
+		l = uint64(len(a)) >> 9
+		andAVX512(&dst[0], &a[0], &b[0], l)
+		l <<= 9
+	}
 	if hasAVX2() {
-		l = uint64(len(a)) >> 8
-		if l != 0 {
-			andAVX2(&dst[0], &a[0], &b[0], l)
+		if n := uint64(len(a)-int(l)) >> 8; n != 0 {
+			andAVX2(&dst[l], &a[l], &b[l], n)
+			l += n << 8
 		}
-		l <<= 8
 	} else if hasAVX() {
 		l = uint64(len(a)) >> 7
 		if l != 0 {
@@ -22,12 +26,16 @@ func and(dst, a, b []byte) {
 
 func or(dst, a, b []byte) {
 	l := uint64(0)
+	if len(a) >= 512 && avx512Worthwhile() {
+		l = uint64(len(a)) >> 9
+		orAVX512(&dst[0], &a[0], &b[0], l)
+		l <<= 9
+	}
 	if hasAVX2() {
-		l = uint64(len(a)) >> 8
-		if l != 0 {
-			orAVX2(&dst[0], &a[0], &b[0], l)
+		if n := uint64(len(a)-int(l)) >> 8; n != 0 {
+			orAVX2(&dst[l], &a[l], &b[l], n)
+			l += n << 8
 		}
-		l <<= 8
 	} else if hasAVX() {
 		l = uint64(len(a)) >> 7
 		if l != 0 {
@@ -40,12 +48,16 @@ func or(dst, a, b []byte) {
 
 func xor(dst, a, b []byte) {
 	l := uint64(0)
+	if len(a) >= 512 && avx512Worthwhile() {
+		l = uint64(len(a)) >> 9
+		xorAVX512(&dst[0], &a[0], &b[0], l)
+		l <<= 9
+	}
 	if hasAVX2() {
-		l = uint64(len(a)) >> 8
-		if l != 0 {
-			xorAVX2(&dst[0], &a[0], &b[0], l)
+		if n := uint64(len(a)-int(l)) >> 8; n != 0 {
+			xorAVX2(&dst[l], &a[l], &b[l], n)
+			l += n << 8
 		}
-		l <<= 8
 	} else if hasAVX() {
 		l = uint64(len(a)) >> 7
 		if l != 0 {
@@ -58,12 +70,16 @@ func xor(dst, a, b []byte) {
 
 func andNot(dst, a, b []byte) {
 	l := uint64(0)
+	if len(a) >= 512 && avx512Worthwhile() {
+		l = uint64(len(a)) >> 9
+		andNotAVX512(&dst[0], &a[0], &b[0], l)
+		l <<= 9
+	}
 	if hasAVX2() {
-		l = uint64(len(a)) >> 8
-		if l != 0 {
-			andNotAVX2(&dst[0], &a[0], &b[0], l)
+		if n := uint64(len(a)-int(l)) >> 8; n != 0 {
+			andNotAVX2(&dst[l], &a[l], &b[l], n)
+			l += n << 8
 		}
-		l <<= 8
 	} else if hasAVX() {
 		l = uint64(len(a)) >> 7
 		if l != 0 {
@@ -76,12 +92,16 @@ func andNot(dst, a, b []byte) {
 
 func not(dst, a []byte) {
 	l := uint64(0)
+	if len(a) >= 512 && avx512Worthwhile() {
+		l = uint64(len(a)) >> 9
+		notAVX512(&dst[0], &a[0], l)
+		l <<= 9
+	}
 	if hasAVX2() {
-		l = uint64(len(a)) >> 8
-		if l != 0 {
-			notAVX2(&dst[0], &a[0], l)
+		if n := uint64(len(a)-int(l)) >> 8; n != 0 {
+			notAVX2(&dst[l], &a[l], n)
+			l += n << 8
 		}
-		l <<= 8
 	} else if hasAVX() {
 		l = uint64(len(a)) >> 7
 		if l != 0 {
@@ -95,12 +115,16 @@ func not(dst, a []byte) {
 func popcnt(a []byte) int {
 	l := uint64(0)
 	var ret int
+	if len(a) >= 512 && hasAVX512VPOPCNTDQ() {
+		l = uint64(len(a)) >> 9
+		ret = popcntAVX512(&a[0], l)
+		l <<= 9
+	}
 	if hasPopcnt() {
-		l = uint64(len(a)) >> 6
-		if l != 0 {
-			ret = popcntAsm(&a[0], l)
+		if n := uint64(len(a)-int(l)) >> 6; n != 0 {
+			ret += popcntAsm(&a[l], n)
+			l += n << 6
 		}
-		l <<= 6
 	}
 	ret += popcntGeneric(a[l:])
 	return ret
@@ -109,12 +133,16 @@ func popcnt(a []byte) int {
 func popcntMasked(a, b []byte) int {
 	l := uint64(0)
 	var ret int
+	if len(a) >= 512 && hasAVX512VPOPCNTDQ() {
+		l = uint64(len(a)) >> 9
+		ret = popcntMaskedAVX512(&a[0], &b[0], l)
+		l <<= 9
+	}
 	if hasPopcnt() && hasAVX() {
-		l = uint64(len(a)) >> 5
-		if l != 0 {
-			ret = popcntMaskedAsmAVX(&a[0], &b[0], l)
+		if n := uint64(len(a)-int(l)) >> 5; n != 0 {
+			ret += popcntMaskedAsmAVX(&a[l], &b[l], n)
+			l += n << 5
 		}
-		l <<= 5
 	}
 	ret += popcntMaskedGeneric(a[l:], b[l:])
 	return ret
@@ -122,12 +150,16 @@ func popcntMasked(a, b []byte) int {
 
 func memset(dst []byte, b byte) {
 	l := uint64(0)
+	if len(dst) >= 64 && avx512Worthwhile() {
+		l = uint64(len(dst)) >> 6
+		memsetAVX512(&dst[0], l, b)
+		l <<= 6
+	}
 	if hasAVX2() {
-		l = uint64(len(dst)) >> 5
-		if l != 0 {
-			memsetAVX2(&dst[0], l, b)
+		if n := uint64(len(dst)-int(l)) >> 5; n != 0 {
+			memsetAVX2(&dst[l], n, b)
+			l += n << 5
 		}
-		l <<= 5
 	} else if hasAVX() {
 		l = uint64(len(dst)) >> 4
 		if l != 0 {
@@ -140,24 +172,40 @@ func memset(dst []byte, b byte) {
 
 func any_(a []byte) bool {
 	l := uint64(0)
-	if hasAVX() {
-		l = uint64(len(a)) >> 8
-		if l != 0 && anyAVX(&a[0], l) {
+	if len(a) >= 512 && avx512Worthwhile() {
+		l = uint64(len(a)) >> 9
+		if anyAVX512(&a[0], l) {
 			return true
 		}
-		l <<= 8
+		l <<= 9
+	}
+	if hasAVX() {
+		if n := uint64(len(a)-int(l)) >> 8; n != 0 {
+			if anyAVX(&a[l], n) {
+				return true
+			}
+			l += n << 8
+		}
 	}
 	return anyGeneric(a[l:])
 }
 
 func anyMasked(a, b []byte) bool {
 	l := uint64(0)
-	if hasAVX() {
-		l = uint64(len(a)) >> 8
-		if l != 0 && anyMaskedAVX(&a[0], &b[0], l) {
+	if len(a) >= 512 && avx512Worthwhile() {
+		l = uint64(len(a)) >> 9
+		if anyMaskedAVX512(&a[0], &b[0], l) {
 			return true
 		}
-		l <<= 8
+		l <<= 9
+	}
+	if hasAVX() {
+		if n := uint64(len(a)-int(l)) >> 8; n != 0 {
+			if anyMaskedAVX(&a[l], &b[l], n) {
+				return true
+			}
+			l += n << 8
+		}
 	}
 	return anyMaskedGeneric(a[l:], b[l:])
 }

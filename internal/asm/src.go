@@ -33,8 +33,9 @@ func main() {
 type AVXLevel string
 
 var (
-	AVX  AVXLevel = "AVX"
-	AVX2 AVXLevel = "AVX2"
+	AVX    AVXLevel = "AVX"
+	AVX2   AVXLevel = "AVX2"
+	AVX512 AVXLevel = "AVX512"
 )
 
 func (a AVXLevel) Bits() int {
@@ -43,6 +44,8 @@ func (a AVXLevel) Bits() int {
 		return 128
 	case AVX2:
 		return 256
+	case AVX512:
+		return 512
 	default:
 		panic("invalid level")
 	}
@@ -58,8 +61,24 @@ func (a AVXLevel) CreateRegister() Op {
 		return XMM()
 	case AVX2:
 		return YMM()
+	case AVX512:
+		return ZMM()
 	default:
 		panic("invalid level")
+	}
+}
+
+// Adapts a variadic EVEX instruction to the three-operand form used by gen.
+func evex(op func(...Op)) func(Op, Op, Op) {
+	return func(a, b, c Op) { op(a, b, c) }
+}
+
+// Move instruction for unaligned loads and stores of a full vector register.
+func (a AVXLevel) MOVDQU(src, dst Op) {
+	if a == AVX512 {
+		VMOVDQU64(src, dst)
+	} else {
+		VMOVDQU(src, dst)
 	}
 }
 
@@ -85,14 +104,14 @@ func gen(name string, op func(Op, Op, Op), avxLevel AVXLevel, doc string) {
 	Label("loop")
 
 	for i := 0; i < len(as); i++ {
-		VMOVDQU(Mem{Base: a, Disp: avxLevel.Bytes() * i}, as[i])
-		VMOVDQU(Mem{Base: b, Disp: avxLevel.Bytes() * i}, bs[i])
+		avxLevel.MOVDQU(Mem{Base: a, Disp: avxLevel.Bytes() * i}, as[i])
+		avxLevel.MOVDQU(Mem{Base: b, Disp: avxLevel.Bytes() * i}, bs[i])
 	}
 	for i := 0; i < len(as); i++ {
 		op(bs[i], as[i], bs[i])
 	}
 	for i := 0; i < len(as); i++ {
-		VMOVDQU(bs[i], Mem{Base: dst, Disp: avxLevel.Bytes() * i})
+		avxLevel.MOVDQU(bs[i], Mem{Base: dst, Disp: avxLevel.Bytes() * i})
 	}
 
 	ADDQ(U32(avxLevel.Bytes()*rounds), a)
@@ -275,7 +294,7 @@ func genMemset(avxLevel AVXLevel) {
 	Label("loop")
 
 	for i := 0; i < rounds; i++ {
-		VMOVDQU(bRepeated, Mem{Base: dst, Disp: avxLevel.Bytes() * i})
+		avxLevel.MOVDQU(bRepeated, Mem{Base: dst, Disp: avxLevel.Bytes() * i})
 	}
 
 	ADDQ(U32(avxLevel.Bytes()*rounds), dst)
